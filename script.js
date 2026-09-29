@@ -15,7 +15,17 @@ const defaultProducts = [
   {id:"p14",name:"Viu",cat:"Streaming",price:11000,detail:"1 Bulan",icon:"VIU",image:""}
 ];
 
-let products = JSON.parse(localStorage.getItem("palugada_products") || "null") || defaultProducts;
+let products = [...defaultProducts];
+try{
+  const saved=JSON.parse(localStorage.getItem("palugada_products") || "null");
+  if(Array.isArray(saved)){
+    const keys=new Set(products.map(p=>String(p.name).toLowerCase()+"|"+String(p.cat).toLowerCase()+"|"+String(p.detail).toLowerCase()));
+    saved.forEach(p=>{
+      const key=String(p.name||"").toLowerCase()+"|"+String(p.cat||"").toLowerCase()+"|"+String(p.detail||"").toLowerCase();
+      if(!keys.has(key)){ products.push(p); keys.add(key); }
+    });
+  }
+}catch(e){ console.warn("Local products:",e.message); }
 let cart = JSON.parse(localStorage.getItem("palugada_cart") || "[]");
 let activeCat = "Semua";
 let editingId = null;
