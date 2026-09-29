@@ -32,18 +32,37 @@ async function loadProductsFromSupabase(){
     const {data,error}=await supabaseClient.from("products").select("*").order("created_at",{ascending:false});
     if(error) throw error;
     if(data && data.length){
-      products=data.map(p=>({id:String(p.id),name:p.name||"",cat:p.cat||p.category||"",price:Number(p.price||0),detail:p.detail||"",icon:p.icon||"",image:p.image||p.image_url||""}));
+      products=data.filter(p=>p.active!==false).map(p=>({id:p.id,name:p.name||"",cat:p.category||p.cat||"",price:Number(p.price||0),detail:p.detail||"",icon:p.icon||"",image:p.image_url||p.image||""}));
       saveProducts(); renderCats(); renderProducts(); renderAdmin();
     }
   }catch(e){ console.warn("Supabase products:",e.message); }
 }
 
 async function saveProductToSupabase(p){
-  if(typeof supabaseClient==="undefined") return true;
-  const row={id:p.id,name:p.name,cat:p.cat,price:p.price,detail:p.detail,icon:p.icon,image:p.image};
-  const {error}=await supabaseClient.from("products").upsert(row,{onConflict:"id"});
-  if(error){ console.error(error); alert("Supabase menolak penyimpanan: "+error.message); return false; }
-  return true;
+  if(typeof supabaseClient==="undefined") return p;
+  const row={
+    name:p.name,
+    category:p.cat,
+    price:p.price,
+    detail:p.detail,
+    image_url:p.image || null,
+    active:p.active!==false,
+    sort_order:Number(p.sort_order||0)
+  };
+  try{
+    if(p.id && !String(p.id).startsWith("p")){
+      const {data,error}=await supabaseClient.from("products").update(row).eq("id",p.id).select().single();
+      if(error) throw error;
+      return {...p,id:data.id};
+    }
+    const {data,error}=await supabaseClient.from("products").insert(row).select().single();
+    if(error) throw error;
+    return {...p,id:data.id};
+  }catch(error){
+    console.error(error);
+    alert("Supabase menolak penyimpanan: "+error.message);
+    return false;
+  }
 }
 
 async function removeProductFromSupabase(id){
@@ -116,7 +135,6 @@ function add(id){
 function saveCart(){
   localStorage.setItem("palugada_cart",JSON.stringify(cart));
   renderCart();
-loadProductsFromSupabase();
 }
 
 function change(id,d){
@@ -175,7 +193,7 @@ function resetForm(){
 function openForm(id=null){
   resetForm();
   if(id){
-    const p=products.find(x=>x.id===id);
+    const p=products.find(x=>String(x.id)===String(id));
     if(!p)return;
     editingId=id;
     $("formTitle").textContent="Edit Produk";
@@ -199,11 +217,11 @@ function closeForm(){
 function editProduct(id){ openForm(id); }
 
 async function deleteProduct(id){
-  const p=products.find(x=>x.id===id);
+  const p=products.find(x=>String(x.id)===String(id));
   if(!p)return;
   if(!confirm(`Hapus produk "${p.name}"?`))return;
   if(!(await removeProductFromSupabase(id))) return;
-  products=products.filter(x=>x.id!==id);
+  products=products.filter(x=>String(x.id)!==String(id));
   saveProducts();
   renderCats(); renderProducts(); renderAdmin();
 }
@@ -242,14 +260,15 @@ $("productForm").addEventListener("submit", async e=>{
   };
   if(!data.name || !data.cat) return alert("Nama dan kategori wajib diisi.");
 
-  const id=editingId || "p"+Date.now();
-  const product=editingId ? {...products.find(p=>p.id===editingId),...data,id} : {...data,id};
-  if(!(await saveProductToSupabase(product))) return;
+  const existing=editingId ? products.find(p=>p.id===editingId) : null;
+  const product=editingId ? {...existing,...data,id:editingId} : {...data,id:"p"+Date.now()};
+  const savedProduct=await saveProductToSupabase(product);
+  if(!savedProduct) return;
   if(editingId){
     const i=products.findIndex(p=>p.id===editingId);
-    if(i>=0) products[i]=product;
+    if(i>=0) products[i]=savedProduct;
   }else{
-    products.unshift(product);
+    products.unshift(savedProduct);
   }
   saveProducts();
   renderCats(); renderProducts(); renderAdmin();
