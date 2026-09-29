@@ -98,7 +98,7 @@ function renderProducts(){
       <h3>${escapeHtml(p.name)}</h3>
       <div class="meta">${escapeHtml(p.detail || "")}</div>
       <div class="price">${rp(p.price)}</div>
-      <button class="add" type="button" data-product-id="${encodeURIComponent(String(p.id))}">+ Keranjang</button>
+      <button class="add" type="button" onclick="window.addProductToCart(this.dataset.id)" data-id="${String(p.id)}">+ Keranjang</button>
     </article>
   `).join("") || `<div class="empty" style="grid-column:1/-1">Produk tidak ditemukan.</div>`;
 }
@@ -319,16 +319,13 @@ $("bottomCart").onclick=openCart;
 $("closeCart").onclick=closeCart;
 $("overlay").onclick=closeCart;
 $("search").oninput=renderProducts;
-document.addEventListener("click",e=>{
-  const btn=e.target.closest("#products .add");
-  if(!btn)return;
-  const id=decodeURIComponent(btn.dataset.productId);
+window.addProductToCart=function(id){
   const p=products.find(x=>String(x.id)===String(id));
-  if(!p)return;
+  if(!p){ alert("Produk tidak ditemukan. Silakan refresh halaman."); return; }
   cart.push({...p,id:Date.now()+Math.random(),qty:1});
   saveCart();
   openCart();
-});
+};
 
 $("adminBackdrop").addEventListener("click",e=>{if(e.target===$("adminBackdrop"))closeAdmin()});
 $("formBackdrop").addEventListener("click",e=>{if(e.target===$("formBackdrop"))closeForm()});
