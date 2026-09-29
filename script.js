@@ -138,23 +138,25 @@ function renderProducts(){
 }
 
 function renderAdmin(){
-  const q = $("adminSearch").value.toLowerCase();
-  const list = products.filter(p => `${p.name} ${p.cat} ${p.detail}`.toLowerCase().includes(q));
-  $("adminProducts").innerHTML = list.map(p => `
+  const q=$("adminSearch").value.toLowerCase();
+  const list=products.filter(p=>`${p.name} ${p.cat} ${p.detail}`.toLowerCase().includes(q));
+  $("adminProducts").innerHTML=list.map(p=>`
     <article class="admin-card">
       ${productVisual(p,"admin-image")}
       <div class="admin-info">
         <strong>${escapeHtml(p.name)}</strong>
         <span>${escapeHtml(p.cat)} • ${rp(p.price)}</span>
-        <small>${escapeHtml(p.detail || "Tanpa detail")}</small>
+        <small>${escapeHtml(p.detail||"Tanpa detail")}</small>
       </div>
       <div class="admin-actions">
-        <button onclick="editProduct('${p.id}')">✏ Edit</button>
-        <button class="danger" onclick="deleteProduct('${p.id}')">🗑 Hapus</button>
+        <button type="button" onclick='window.editProduct("${String(p.id).replace(/"/g,"&quot;")}")'>✏ Edit</button>
+        <button type="button" class="danger" onclick='window.deleteProduct("${String(p.id).replace(/"/g,"&quot;")}")'>🗑 Hapus</button>
       </div>
     </article>
-  `).join("") || `<div class="empty">Produk tidak ditemukan.</div>`;
+  `).join("")||`<div class="empty">Produk tidak ditemukan.</div>`;
 }
+window.editProduct=editProduct;
+window.deleteProduct=deleteProduct;
 
 function setCat(c){ activeCat=c; renderCats(); renderProducts(); }
 window.setCat=setCat;
@@ -367,7 +369,7 @@ $("addProductBtn").onclick=()=>openForm();
 $("closeForm").onclick=closeForm;
 $("cancelForm").onclick=closeForm;
 $("closeAdmin").onclick=closeAdmin;
-$("openAdmin").onclick=openAdmin;
+$("openAdmin").addEventListener("click",function(e){e.preventDefault();openAdmin();});
 $("closeLogin").onclick=closeLogin;
 $("cancelLogin").onclick=closeLogin;
 $("loginBackdrop").addEventListener("click",e=>{if(e.target===$("loginBackdrop"))closeLogin()});
@@ -410,9 +412,6 @@ $("checkoutBtn").onclick=()=>{
   window.open("https://wa.me/6282319524232?text="+encodeURIComponent(msg),"_blank");
 };
 
-function escapeHtml(value){
-  return String(value??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
-}
 
 renderCats();
 renderProducts();
