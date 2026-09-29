@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b1220">
   <title>PALUGADA SHOP30 — Premium Digital</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style(1).css">
 </head>
 <body>
 <header class="topbar">
@@ -13,7 +13,10 @@
     <div class="brand-mark">P30</div>
     <div><strong>PALUGADA SHOP30</strong><small>Digital Premium</small></div>
   </div>
-  <button class="cart-btn" id="openCart" aria-label="Buka keranjang">🛒 <span id="cartCount">0</span></button>
+  <div class="top-actions">
+    <button class="admin-btn" id="openAdmin">⚙ Admin</button>
+    <button class="cart-btn" id="openCart" aria-label="Buka keranjang">🛒 <span id="cartCount">0</span></button>
+  </div>
 </header>
 
 <main>
@@ -55,6 +58,68 @@
     <a class="secondary" href="https://t.me/palugadashop30" target="_blank">Telegram</a>
   </div>
 </section>
+
+<!-- Admin -->
+<div class="modal-backdrop" id="adminBackdrop">
+  <section class="admin-panel" role="dialog" aria-modal="true">
+    <div class="admin-head">
+      <div><span class="eyebrow">MANAJEMEN TOKO</span><h2>Panel Admin</h2></div>
+      <button class="close-btn" id="closeAdmin">✕</button>
+    </div>
+
+    <div class="admin-toolbar">
+      <input id="adminSearch" class="search" placeholder="Cari produk untuk diedit...">
+      <button class="primary dark" id="addProductBtn">＋ Tambah Produk</button>
+    </div>
+
+    <div id="adminProducts" class="admin-products"></div>
+  </section>
+</div>
+
+<!-- Product form -->
+<div class="modal-backdrop" id="formBackdrop">
+  <section class="form-panel" role="dialog" aria-modal="true">
+    <div class="admin-head">
+      <div><span class="eyebrow">PRODUK</span><h2 id="formTitle">Tambah Produk</h2></div>
+      <button class="close-btn" id="closeForm">✕</button>
+    </div>
+
+    <form id="productForm" class="product-form">
+      <input type="hidden" id="productId">
+      <div class="image-editor">
+        <div id="imagePreview" class="image-preview">Gambar</div>
+        <div class="image-actions">
+          <label class="upload-btn">＋ Tambah/Ganti Gambar
+            <input id="imageInput" type="file" accept="image/*" hidden>
+          </label>
+          <button type="button" class="secondary" id="removeImageBtn">Hapus Gambar</button>
+          <small>JPG, PNG, WEBP. Gambar disimpan di browser ini.</small>
+        </div>
+      </div>
+
+      <label>Nama Produk
+        <input id="nameInput" required maxlength="80" placeholder="Contoh: Netflix">
+      </label>
+      <label>Kategori
+        <input id="catInput" required maxlength="40" placeholder="Contoh: Streaming">
+      </label>
+      <label>Harga (Rp)
+        <input id="priceInput" required type="number" min="0" step="1000" placeholder="20000">
+      </label>
+      <label>Detail Produk
+        <textarea id="detailInput" maxlength="180" placeholder="1 Bulan • Garansi"></textarea>
+      </label>
+      <label>Ikon jika tanpa gambar
+        <input id="iconInput" maxlength="8" placeholder="N">
+      </label>
+
+      <div class="form-actions">
+        <button type="button" class="secondary" id="cancelForm">Batal</button>
+        <button type="submit" class="primary dark">Simpan Produk</button>
+      </div>
+    </form>
+  </section>
+</div>
 
 <div class="overlay" id="overlay"></div>
 <aside class="drawer" id="drawer">
