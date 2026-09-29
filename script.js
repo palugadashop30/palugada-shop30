@@ -32,12 +32,34 @@ async function loadProductsFromSupabase(){
     const {data,error}=await supabaseClient.from("products").select("*").order("created_at",{ascending:false});
     if(error) throw error;
     if(data){
-      products=data.filter(p=>p.active === true || p.active == null).map(p=>({id:p.id,name:p.name||"",cat:p.category||p.cat||"",price:Number(p.price||0),detail:p.detail||"",icon:p.icon||"",image:p.image_url||p.image||""}));
-      saveProducts(); renderCats(); renderProducts(); renderAdmin();
+      const dbProducts=data.filter(p=>p.active === true || p.active == null).map(p=>({
+        id:p.id,
+        name:p.name||"",
+        cat:p.category||p.cat||"",
+        price:Number(p.price||0),
+        detail:p.detail||"",
+        icon:p.icon||"",
+        image:p.image_url||p.image||""
+      }));
+
+      const merged=new Map();
+      products.forEach(p=>{
+        const key=String(p.name||"").trim().toLowerCase()+"|"+String(p.cat||"").trim().toLowerCase()+"|"+String(p.detail||"").trim().toLowerCase();
+        merged.set(key,p);
+      });
+      dbProducts.forEach(p=>{
+        const key=String(p.name||"").trim().toLowerCase()+"|"+String(p.cat||"").trim().toLowerCase()+"|"+String(p.detail||"").trim().toLowerCase();
+        merged.set(key,p);
+      });
+
+      products=Array.from(merged.values());
+      saveProducts();
+      renderCats();
+      renderProducts();
+      renderAdmin();
     }
   }catch(e){ console.warn("Supabase products:",e.message); }
 }
-
 async function saveProductToSupabase(p){
   if(typeof supabaseClient==="undefined") return p;
   const row={
