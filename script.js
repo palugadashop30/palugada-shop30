@@ -109,7 +109,7 @@ async function removeProductFromSupabase(id){
 function renderCats(){
   const cats = ["Semua", ...new Set(products.map(p=>p.cat).filter(Boolean))];
   $("categories").innerHTML = cats.map(c =>
-    `<button type="button" class="chip ${c===activeCat?"active":""}" onclick="setCat(${JSON.stringify(c)})">${escapeHtml(c)}</button>`
+    `<button class="chip ${c===activeCat?"active":""}" onclick="setCat(${JSON.stringify(c)})">${escapeHtml(c)}</button>`
   ).join("");
 }
 
@@ -403,17 +403,9 @@ $("checkoutBtn").onclick=()=>{
   if(!cart.length)return alert("Keranjang masih kosong.");
   const name=$("customerName").value.trim(), wa=$("customerWa").value.trim(), note=$("customerNote").value.trim();
   if(!name||!wa)return alert("Isi nama dan nomor WhatsApp terlebih dahulu.");
-  const lines=cart.map(x=>`- ${x.name} | ${x.detail}${(x.addons||[]).length?` | Tambahan: ${x.addons.map(a=>a.name+` +${rp(a.price)}`).join(", ")}`:""} | ${x.qty}x | ${rp((x.price+(x.addons||[]).reduce((s,a)=>s+Number(a.price||0),0))*x.qty)}`).join("
-");
+  const lines=cart.map(x=>`- ${x.name} | ${x.detail}${(x.addons||[]).length?` | Tambahan: ${x.addons.map(a=>a.name+` +${rp(a.price)}`).join(", ")}`:""} | ${x.qty}x | ${rp((x.price+(x.addons||[]).reduce((s,a)=>s+Number(a.price||0),0))*x.qty)}`).join("\n");
   const total=rp(cart.reduce((s,x)=>s+x.price*x.qty,0));
-  const msg=`Halo PALUGADA SHOP30, saya ingin order:
-
-${lines}
-
-Total: ${total}
-Nama: ${name}
-WA: ${wa}${note?`
-Catatan: ${note}`:""}`;
+  const msg=`Halo PALUGADA SHOP30, saya ingin order:\n\n${lines}\n\nTotal: ${total}\nNama: ${name}\nWA: ${wa}${note?`\nCatatan: ${note}`:""}`;
   window.open("https://wa.me/6282319524232?text="+encodeURIComponent(msg),"_blank");
 };
 
@@ -436,17 +428,9 @@ $("checkoutBtn").onclick=()=>{
   if(!cart.length)return alert("Keranjang masih kosong.");
   const name=$("customerName").value.trim(), wa=$("customerWa").value.trim(), note=$("customerNote").value.trim();
   if(!name||!wa)return alert("Isi nama dan nomor WhatsApp terlebih dahulu.");
-  const lines=cart.map(x=>'- '+x.name+' | '+x.detail+((x.addons||[]).length?' | Tambahan: '+x.addons.map(a=>a.name+' +'+rp(a.price)).join(", "):"")+' | '+x.qty+'x | '+rp(cartItemTotal(x)*x.qty)).join("
-");
+  const lines=cart.map(x=>'- '+x.name+' | '+x.detail+((x.addons||[]).length?' | Tambahan: '+x.addons.map(a=>a.name+' +'+rp(a.price)).join(", "):"")+' | '+x.qty+'x | '+rp(cartItemTotal(x)*x.qty)).join("\n");
   const total=rp(cart.reduce((s,x)=>s+cartItemTotal(x)*x.qty,0));
-  const msg='Halo PALUGADA SHOP30, saya ingin order:
-
-'+lines+'
-
-Total: '+total+'
-Nama: '+name+'
-WA: '+wa+(note?'
-Catatan: '+note:"");
+  const msg='Halo PALUGADA SHOP30, saya ingin order:\n\n'+lines+'\n\nTotal: '+total+'\nNama: '+name+'\nWA: '+wa+(note?'\nCatatan: '+note:"");
   window.open("https://wa.me/6282319524232?text="+encodeURIComponent(msg),"_blank");
 };
 
