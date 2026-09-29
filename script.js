@@ -24,8 +24,33 @@ let pendingImage = "";
 const rp = n => n ? new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(n) : "Hubungi admin";
 const $ = id => document.getElementById(id);
 
-function saveProducts(){
-  localStorage.setItem("palugada_products", JSON.stringify(products));
+function saveProducts(){ localStorage.setItem("palugada_products", JSON.stringify(products)); }
+
+async function loadProductsFromSupabase(){
+  if(typeof supabaseClient==="undefined") return;
+  try{
+    const {data,error}=await supabaseClient.from("products").select("*").order("created_at",{ascending:false});
+    if(error) throw error;
+    if(data && data.length){
+      products=data.map(p=>({id:String(p.id),name:p.name||"",cat:p.cat||p.category||"",price:Number(p.price||0),detail:p.detail||"",icon:p.icon||"",image:p.image||p.image_url||""}));
+      saveProducts(); renderCats(); renderProducts(); renderAdmin();
+    }
+  }catch(e){ console.warn("Supabase products:",e.message); }
+}
+
+async function saveProductToSupabase(p){
+  if(typeof supabaseClient==="undefined") return true;
+  const row={id:p.id,name:p.name,cat:p.cat,price:p.price,detail:p.detail,icon:p.icon,image:p.image};
+  const {error}=await supabaseClient.from("products").upsert(row,{onConflict:"id"});
+  if(error){ console.error(error); alert("Supabase menolak penyimpanan: "+error.message); return false; }
+  return true;
+}
+
+async function removeProductFromSupabase(id){
+  if(typeof supabaseClient==="undefined") return true;
+  const {error}=await supabaseClient.from("products").delete().eq("id",id);
+  if(error){ console.error(error); alert("Supabase menolak penghapusan: "+error.message); return false; }
+  return true;
 }
 
 function renderCats(){
@@ -91,6 +116,7 @@ function add(id){
 function saveCart(){
   localStorage.setItem("palugada_cart",JSON.stringify(cart));
   renderCart();
+loadProductsFromSupabase();
 }
 
 function change(id,d){
@@ -172,10 +198,11 @@ function closeForm(){
 
 function editProduct(id){ openForm(id); }
 
-function deleteProduct(id){
+async function deleteProduct(id){
   const p=products.find(x=>x.id===id);
   if(!p)return;
   if(!confirm(`Hapus produk "${p.name}"?`))return;
+  if(!(await removeProductFromSupabase(id))) return;
   products=products.filter(x=>x.id!==id);
   saveProducts();
   renderCats(); renderProducts(); renderAdmin();
@@ -203,7 +230,7 @@ function readImage(file){
   reader.readAsDataURL(file);
 }
 
-$("productForm").addEventListener("submit", e=>{
+$("productForm").addEventListener("submit", async e=>{
   e.preventDefault();
   const data={
     name:$("nameInput").value.trim(),
@@ -215,11 +242,14 @@ $("productForm").addEventListener("submit", e=>{
   };
   if(!data.name || !data.cat) return alert("Nama dan kategori wajib diisi.");
 
+  const id=editingId || "p"+Date.now();
+  const product=editingId ? {...products.find(p=>p.id===editingId),...data,id} : {...data,id};
+  if(!(await saveProductToSupabase(product))) return;
   if(editingId){
     const i=products.findIndex(p=>p.id===editingId);
-    if(i>=0) products[i]={...products[i],...data};
+    if(i>=0) products[i]=product;
   }else{
-    products.unshift({...data,id:"p"+Date.now()});
+    products.unshift(product);
   }
   saveProducts();
   renderCats(); renderProducts(); renderAdmin();
