@@ -166,10 +166,21 @@ function renderCart(){
 function openCart(){ $("drawer").classList.add("open"); $("overlay").classList.add("show"); }
 function closeCart(){ $("drawer").classList.remove("open"); $("overlay").classList.remove("show"); }
 
-function openAdmin(){
+async function openAdmin(){
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  if(!session){
+    $("loginError").textContent="";
+    $("loginBackdrop").classList.add("show");
+    document.body.classList.add("modal-open");
+    return;
+  }
   renderAdmin();
   $("adminBackdrop").classList.add("show");
   document.body.classList.add("modal-open");
+}
+function closeLogin(){
+  $("loginBackdrop").classList.remove("show");
+  if(!$("adminBackdrop").classList.contains("show")&&!$("formBackdrop").classList.contains("show"))document.body.classList.remove("modal-open");
 }
 function closeAdmin(){
   $("adminBackdrop").classList.remove("show");
@@ -286,6 +297,21 @@ $("closeForm").onclick=closeForm;
 $("cancelForm").onclick=closeForm;
 $("closeAdmin").onclick=closeAdmin;
 $("openAdmin").onclick=openAdmin;
+$("closeLogin").onclick=closeLogin;
+$("cancelLogin").onclick=closeLogin;
+$("loginBackdrop").addEventListener("click",e=>{if(e.target===$("loginBackdrop"))closeLogin()});
+$("loginForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  $("loginError").textContent="";
+  const {error}=await supabaseClient.auth.signInWithPassword({
+    email:$("loginEmail").value.trim(),
+    password:$("loginPassword").value
+  });
+  if(error){$("loginError").textContent="Email atau password salah.";return;}
+  closeLogin();
+  openAdmin();
+});
+$("logoutBtn").onclick=async()=>{await supabaseClient.auth.signOut();closeAdmin();};
 $("adminSearch").oninput=renderAdmin;
 
 $("openCart").onclick=openCart;
