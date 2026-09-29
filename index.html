@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1220">
+  <title>PALUGADA SHOP30 — Premium Digital</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">P30</div>
+    <div><strong>PALUGADA SHOP30</strong><small>Digital Premium</small></div>
+  </div>
+  <button class="cart-btn" id="openCart" aria-label="Buka keranjang">🛒 <span id="cartCount">0</span></button>
+</header>
+
+<main>
+  <section class="hero">
+    <span class="eyebrow">PREMIUM DIGITAL STORE</span>
+    <h1>Akun premium,<br><span>mudah & cepat.</span></h1>
+    <p>Pesan produk digital favoritmu langsung dari HP.</p>
+    <a href="#produk" class="primary">Lihat Produk</a>
+  </section>
+
+  <section class="trust">
+    <div>✓ Proses mudah</div><div>✓ Harga terjangkau</div><div>✓ Ada garansi*</div>
+  </section>
+
+  <section id="produk" class="catalog">
+    <div class="section-head">
+      <div><span class="eyebrow">KATALOG</span><h2>Produk Premium</h2></div>
+      <span id="productTotal" class="muted"></span>
+    </div>
+    <input id="search" class="search" placeholder="Cari produk..." autocomplete="off">
+    <div id="categories" class="chips"></div>
+    <div id="products" class="grid"></div>
+  </section>
+</main>
+
+<div class="bottom-nav">
+  <a href="#" class="active">⌂<span>Home</span></a>
+  <a href="#produk">▦<span>Produk</span></a>
+  <button id="bottomCart">🛒<span>Keranjang</span><b id="bottomCount">0</b></button>
+  <a href="#kontak">✆<span>Kontak</span></a>
+</div>
+
+<section id="kontak" class="contact">
+  <span class="eyebrow">ORDER</span>
+  <h2>Butuh bantuan?</h2>
+  <p>Order langsung melalui WhatsApp atau Telegram.</p>
+  <div class="contact-actions">
+    <a class="primary" href="https://wa.me/6282319524232" target="_blank">WhatsApp</a>
+    <a class="secondary" href="https://t.me/palugadashop30" target="_blank">Telegram</a>
+  </div>
+</section>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head"><h2>Keranjang</h2><button id="closeCart">✕</button></div>
+  <div id="cartItems" class="cart-items"></div>
+  <div class="checkout">
+    <div class="total"><span>Total</span><strong id="cartTotal">Rp0</strong></div>
+    <input id="customerName" placeholder="Nama kamu">
+    <input id="customerWa" placeholder="Nomor WhatsApp">
+    <textarea id="customerNote" placeholder="Catatan (opsional)"></textarea>
+    <button class="primary full" id="checkoutBtn">Order via WhatsApp</button>
+    <small>Dengan melakukan order, kamu menyetujui syarat & ketentuan toko.</small>
+  </div>
+</aside>
+
+<script src="script.js"></script>
+</body>
+</html>
