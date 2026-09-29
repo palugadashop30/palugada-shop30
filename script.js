@@ -1,18 +1,18 @@
 const defaultProducts = [
-  {id:"p1",name:"Netflix",cat:"Streaming",price:20000,detail:"1P1U • 1 Bulan • Garansi 10 hari",icon:"N",image:""},
-  {id:"p2",name:"YouTube Premium",cat:"Streaming",price:35000,detail:"3 Bulan • Garansi 1x Ganti",icon:"YT",image:""},
-  {id:"p3",name:"Gemini AI",cat:"AI",price:35000,detail:"3 Bulan",icon:"G",image:""},
-  {id:"p4",name:"ChatGPT Go",cat:"AI",price:0,detail:"1 Bulan • Hubungi admin",icon:"AI",image:""},
-  {id:"p5",name:"CapCut Pro",cat:"Design",price:35000,detail:"30 Hari • Garansi",icon:"C",image:""},
+  {id:"p1",name:"Netflix",cat:"Streaming",price:20000,detail:"1P1U • 1 Bulan • Garansi 10 hari",icon:"N",image:"",options:[]},
+  {id:"p2",name:"YouTube Premium",cat:"Streaming",price:35000,detail:"3 Bulan • Garansi 1x Ganti",icon:"YT",image:"",options:[]},
+  {id:"p3",name:"Gemini AI",cat:"AI",price:35000,detail:"3 Bulan",icon:"G",image:"",options:[]},
+  {id:"p4",name:"ChatGPT Go",cat:"AI",price:0,detail:"1 Bulan • Hubungi admin",icon:"AI",image:"",options:[]},
+  {id:"p5",name:"CapCut Pro",cat:"Design",price:35000,detail:"30 Hari • Garansi",icon:"C",image:"",options:[]},
   {id:"p6",name:"CapCut Pro",cat:"Design",price:18000,detail:"7 Hari • Garansi",icon:"C",image:""},
-  {id:"p7",name:"Canva",cat:"Design",price:25000,detail:"3 Bulan",icon:"CA",image:""},
-  {id:"p8",name:"WeTV",cat:"Streaming",price:15000,detail:"1 Bulan",icon:"W",image:""},
-  {id:"p9",name:"Vidio Platinum",cat:"Streaming",price:25000,detail:"1 Bulan • Mobile",icon:"V",image:""},
-  {id:"p10",name:"Spotify",cat:"Music",price:20000,detail:"1 Bulan",icon:"S",image:""},
-  {id:"p11",name:"iQIYI",cat:"Streaming",price:10000,detail:"1 Bulan",icon:"IQ",image:""},
-  {id:"p12",name:"Vision+",cat:"Streaming",price:17000,detail:"1 Bulan",icon:"V+",image:""},
-  {id:"p13",name:"Meitu VIP+",cat:"Design",price:19000,detail:"1 Bulan",icon:"M",image:""},
-  {id:"p14",name:"Viu",cat:"Streaming",price:11000,detail:"1 Bulan",icon:"VIU",image:""}
+  {id:"p7",name:"Canva",cat:"Design",price:25000,detail:"3 Bulan",icon:"CA",image:"",options:[]},
+  {id:"p8",name:"WeTV",cat:"Streaming",price:15000,detail:"1 Bulan",icon:"W",image:"",options:[]},
+  {id:"p9",name:"Vidio Platinum",cat:"Streaming",price:25000,detail:"1 Bulan • Mobile",icon:"V",image:"",options:[]},
+  {id:"p10",name:"Spotify",cat:"Music",price:20000,detail:"1 Bulan",icon:"S",image:"",options:[]},
+  {id:"p11",name:"iQIYI",cat:"Streaming",price:10000,detail:"1 Bulan",icon:"IQ",image:"",options:[]},
+  {id:"p12",name:"Vision+",cat:"Streaming",price:17000,detail:"1 Bulan",icon:"V+",image:"",options:[]},
+  {id:"p13",name:"Meitu VIP+",cat:"Design",price:19000,detail:"1 Bulan",icon:"M",image:"",options:[]},
+  {id:"p14",name:"Viu",cat:"Streaming",price:11000,detail:"1 Bulan",icon:"VIU",image:"",options:[]}
 ];
 
 let products = [...defaultProducts];
@@ -49,7 +49,8 @@ async function loadProductsFromSupabase(){
         price:Number(p.price||0),
         detail:p.detail||"",
         icon:p.icon||"",
-        image:p.image_url||p.image||""
+        image:p.image_url||p.image||"",
+        options:Array.isArray(p.options)?p.options:[]
       }));
 
       const merged=new Map();
@@ -79,7 +80,8 @@ async function saveProductToSupabase(p){
     detail:p.detail,
     image_url:p.image || null,
     active:p.active!==false,
-    sort_order:Number(p.sort_order||0)
+    sort_order:Number(p.sort_order||0),
+    options:Array.isArray(p.options)?p.options:[]
   };
   try{
     if(p.id && !String(p.id).startsWith("p")){
@@ -130,7 +132,7 @@ function renderProducts(){
       <h3>${escapeHtml(p.name)}</h3>
       <div class="meta">${escapeHtml(p.detail || "")}</div>
       <div class="price">${rp(p.price)}</div>
-      <button class="add" type="button" onclick="window.addProductToCart(this.dataset.id)" data-id="${String(p.id)}">+ Keranjang</button>
+      <button class="add" type="button" onclick="window.addProductToCart(this.dataset.id)" data-id="${String(p.id)}">${(p.options||[]).length?"+ Pilih & Keranjang":"+ Keranjang"}</button>
     </article>
   `).join("") || `<div class="empty" style="grid-column:1/-1">Produk tidak ditemukan.</div>`;
 }
@@ -156,13 +158,7 @@ function renderAdmin(){
 
 function setCat(c){ activeCat=c; renderCats(); renderProducts(); }
 
-function add(id){
-  const p = products.find(x=>String(x.id)===String(id));
-  if(!p) return;
-  cart.push({...p,id:Date.now()+Math.random(),qty:1});
-  saveCart();
-  openCart();
-}
+function add(id){ window.addProductToCart(id); }
 
 function saveCart(){
   localStorage.setItem("palugada_cart",JSON.stringify(cart));
@@ -186,13 +182,13 @@ function renderCart(){
   } else {
     $("cartItems").innerHTML=cart.map(x=>`
       <div class="cart-row">
-        <strong>${escapeHtml(x.name)}</strong><br><small>${escapeHtml(x.detail||"")}</small>
+        <strong>${escapeHtml(x.name)}</strong><br><small>${escapeHtml(x.detail||"")}</small>${(x.addons||[]).length?`<div class="cart-addons">+ ${(x.addons||[]).map(a=>escapeHtml(a.name)+` (${rp(a.price)})`).join(", ")}</div>`:""}
         <div class="row-actions"><b>${rp(x.price*x.qty)}</b>
           <div class="qty"><button onclick="change(${x.id},-1)">−</button> <span>${x.qty}</span> <button onclick="change(${x.id},1)">+</button></div>
         </div>
       </div>`).join("");
   }
-  $("cartTotal").textContent=rp(cart.reduce((s,x)=>s+x.price*x.qty,0));
+  $("cartTotal").textContent=rp(cart.reduce((s,x)=>s+(x.price+(x.addons||[]).reduce((a,o)=>a+Number(o.price||0),0))*x.qty,0));
 }
 
 function openCart(){ $("drawer").classList.add("open"); $("overlay").classList.add("show"); }
@@ -231,6 +227,7 @@ function resetForm(){
   $("imageInput").value="";
   $("imagePreview").innerHTML="Gambar";
   $("removeImageBtn").disabled=true;
+  renderOptionEditor([]);
 }
 
 function openForm(id=null){
@@ -247,6 +244,7 @@ function openForm(id=null){
     $("iconInput").value=p.icon||"";
     pendingImage=p.image||"";
     showImagePreview(p.image||"");
+    renderOptionEditor(Array.isArray(p.options)?p.options:[]);
   }
   $("formBackdrop").classList.add("show");
   document.body.classList.add("modal-open");
@@ -276,6 +274,44 @@ function showImagePreview(src){
   $("removeImageBtn").disabled=!src;
 }
 
+function renderOptionEditor(options){
+  const box=$("optionEditor");
+  if(!box)return;
+  box.innerHTML=(options||[]).map((o,i)=>
+    `<div class="option-edit-row"><input class="option-name" placeholder="Nama tambahan" value="${escapeHtml(o.name||"")}"><input class="option-price" type="number" min="0" step="1000" placeholder="Harga" value="${Number(o.price||0)}"><button type="button" onclick="removeOptionRow(this)">✕</button></div>`).join("");
+}
+function readOptionEditor(){
+  return Array.from(document.querySelectorAll(".option-edit-row")).map(r=>({name:r.querySelector(".option-name").value.trim(),price:Number(r.querySelector(".option-price").value)||0})).filter(o=>o.name);
+}
+window.removeOptionRow=function(btn){btn.closest(".option-edit-row")?.remove();};
+window.addOptionRow=function(){
+  const box=$("optionEditor");
+  box.insertAdjacentHTML("beforeend",`<div class="option-edit-row"><input class="option-name" placeholder="Nama tambahan"><input class="option-price" type="number" min="0" step="1000" placeholder="Harga"><button type="button" onclick="removeOptionRow(this)">✕</button></div>`);
+};
+
+function openOptionPicker(id){
+  const p=products.find(x=>String(x.id)===String(id));
+  if(!p)return;
+  const opts=Array.isArray(p.options)?p.options:[];
+  if(!opts.length){ cart.push({...p,id:Date.now()+Math.random(),qty:1,addons:[]}); saveCart(); openCart(); return; }
+  $("optionTitle").textContent=p.name;
+  $("optionList").innerHTML=`<div class="option-base"><strong>Harga dasar: ${rp(p.price)}</strong></div>`+
+    opts.map((o,i)=>`<label class="option-check"><input type="checkbox" data-option-index="${i}"><span>${escapeHtml(o.name)}</span><b>+${rp(o.price)}</b></label>`).join("");
+  $("optionBackdrop").dataset.productId=p.id;
+  $("optionBackdrop").classList.add("show");
+  document.body.classList.add("modal-open");
+}
+function closeOptionPicker(){ $("optionBackdrop").classList.remove("show"); if(!$("adminBackdrop").classList.contains("show")&&!$("formBackdrop").classList.contains("show")&&!$("loginBackdrop").classList.contains("show"))document.body.classList.remove("modal-open"); }
+function confirmOptionPicker(){
+  const id=$("optionBackdrop").dataset.productId;
+  const p=products.find(x=>String(x.id)===String(id));
+  if(!p)return;
+  const opts=Array.isArray(p.options)?p.options:[];
+  const addons=Array.from(document.querySelectorAll("#optionList input[data-option-index]:checked")).map(i=>opts[Number(i.dataset.optionIndex)]).filter(Boolean).map(o=>({name:o.name,price:Number(o.price)||0}));
+  cart.push({...p,id:Date.now()+Math.random(),qty:1,addons});
+  closeOptionPicker(); saveCart(); openCart();
+}
+
 function readImage(file){
   if(!file)return;
   if(file.size > 3*1024*1024){
@@ -299,7 +335,8 @@ $("productForm").addEventListener("submit", async e=>{
     price:Number($("priceInput").value)||0,
     detail:$("detailInput").value.trim(),
     icon:$("iconInput").value.trim() || $("nameInput").value.trim().slice(0,2).toUpperCase(),
-    image:pendingImage
+    image:pendingImage,
+    options:readOptionEditor()
   };
   if(!data.name || !data.cat) return alert("Nama dan kategori wajib diisi.");
 
@@ -351,22 +388,21 @@ $("bottomCart").onclick=openCart;
 $("closeCart").onclick=closeCart;
 $("overlay").onclick=closeCart;
 $("search").oninput=renderProducts;
-window.addProductToCart=function(id){
-  const p=products.find(x=>String(x.id)===String(id));
-  if(!p){ alert("Produk tidak ditemukan. Silakan refresh halaman."); return; }
-  cart.push({...p,id:Date.now()+Math.random(),qty:1});
-  saveCart();
-  openCart();
-};
+window.addProductToCart=function(id){ openOptionPicker(id); };
 
 $("adminBackdrop").addEventListener("click",e=>{if(e.target===$("adminBackdrop"))closeAdmin()});
 $("formBackdrop").addEventListener("click",e=>{if(e.target===$("formBackdrop"))closeForm()});
+$("closeOption").onclick=closeOptionPicker;
+$("cancelOption").onclick=closeOptionPicker;
+$("confirmOption").onclick=confirmOptionPicker;
+$("optionBackdrop").addEventListener("click",e=>{if(e.target===$("optionBackdrop"))closeOptionPicker()});
+$("addOptionBtn").onclick=window.addOptionRow;
 
 $("checkoutBtn").onclick=()=>{
   if(!cart.length)return alert("Keranjang masih kosong.");
   const name=$("customerName").value.trim(), wa=$("customerWa").value.trim(), note=$("customerNote").value.trim();
   if(!name||!wa)return alert("Isi nama dan nomor WhatsApp terlebih dahulu.");
-  const lines=cart.map(x=>`- ${x.name} | ${x.detail} | ${x.qty}x | ${rp(x.price*x.qty)}`).join("\n");
+  const lines=cart.map(x=>`- ${x.name} | ${x.detail}${(x.addons||[]).length?` | Tambahan: ${x.addons.map(a=>a.name+` +${rp(a.price)}`).join(", ")}`:""} | ${x.qty}x | ${rp((x.price+(x.addons||[]).reduce((s,a)=>s+Number(a.price||0),0))*x.qty)}`).join("\n");
   const total=rp(cart.reduce((s,x)=>s+x.price*x.qty,0));
   const msg=`Halo PALUGADA SHOP30, saya ingin order:\n\n${lines}\n\nTotal: ${total}\nNama: ${name}\nWA: ${wa}${note?`\nCatatan: ${note}`:""}`;
   window.open("https://wa.me/6282319524232?text="+encodeURIComponent(msg),"_blank");
