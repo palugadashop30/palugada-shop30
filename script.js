@@ -109,7 +109,7 @@ async function removeProductFromSupabase(id){
 function renderCats(){
   const cats = ["Semua", ...new Set(products.map(p=>p.cat).filter(Boolean))];
   $("categories").innerHTML = cats.map(c =>
-    `<button class="chip ${c===activeCat?"active":""}" onclick="setCat(${JSON.stringify(c)})">${escapeHtml(c)}</button>`
+    `<button type="button" class="chip ${c===activeCat?"active":""}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`
   ).join("");
 }
 
@@ -388,7 +388,7 @@ $("openCart").onclick=openCart;
 $("bottomCart").onclick=openCart;
 $("closeCart").onclick=closeCart;
 $("overlay").onclick=closeCart;
-$("search").oninput=renderProducts;
+$("search").oninput=renderProducts;\n$("categories").onclick=function(e){const b=e.target.closest(".chip");if(!b)return;setCat(b.getAttribute("data-cat")||"Semua");};
 window.addProductToCart=function(id){ openOptionPicker(id); };
 
 $("adminBackdrop").addEventListener("click",e=>{if(e.target===$("adminBackdrop"))closeAdmin()});
