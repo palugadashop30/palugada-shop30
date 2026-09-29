@@ -109,7 +109,7 @@ async function removeProductFromSupabase(id){
 function renderCats(){
   const cats = ["Semua", ...new Set(products.map(p=>p.cat).filter(Boolean))];
   $("categories").innerHTML = cats.map(c =>
-    `<button type="button" class="chip ${c===activeCat?"active":""}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`
+    `<button type="button" class="chip ${c===activeCat?"active":""}" onclick="window.setCat('${String(c).replace(/'/g,"\\'")}')">${escapeHtml(c)}</button>`
   ).join("");
 }
 
@@ -157,6 +157,7 @@ function renderAdmin(){
 }
 
 function setCat(c){ activeCat=c; renderCats(); renderProducts(); }
+window.setCat=setCat;
 
 function add(id){ window.addProductToCart(id); }
 
