@@ -9,132 +9,21 @@
 </head>
 <body>
 <header class="topbar">
-  <div class="brand">
-    <div class="brand-mark">P30</div>
-    <div><strong>PALUGADA SHOP30</strong><small>Digital Premium</small></div>
-  </div>
-  <div class="top-actions">
-    <button class="admin-btn" id="openAdmin">⚙ Admin</button>
-    <button class="cart-btn" id="openCart" aria-label="Buka keranjang">🛒 <span id="cartCount">0</span></button>
-  </div>
+  <div class="brand"><div class="brand-mark">P30</div><div><strong>PALUGADA SHOP30</strong><small>Digital Premium</small></div></div>
+  <div class="top-actions"><button class="admin-btn" id="openAdmin">⚙ Admin</button><button class="cart-btn" id="openCart" aria-label="Buka keranjang">🛒 <span id="cartCount">0</span></button></div>
 </header>
-
 <main>
-  <section class="hero">
-    <span class="eyebrow">PREMIUM DIGITAL STORE</span>
-    <h1>Akun premium,<br><span>mudah & cepat.</span></h1>
-    <p>Pesan produk digital favoritmu langsung dari HP.</p>
-    <a href="#produk" class="primary">Lihat Produk</a>
-  </section>
-
-  <section class="trust">
-    <div>✓ Proses mudah</div><div>✓ Harga terjangkau</div><div>✓ Ada garansi*</div>
-  </section>
-
-  <section id="produk" class="catalog">
-    <div class="section-head">
-      <div><span class="eyebrow">KATALOG</span><h2>Produk Premium</h2></div>
-      <span id="productTotal" class="muted"></span>
-    </div>
-    <input id="search" class="search" placeholder="Cari produk..." autocomplete="off">
-    <div id="categories" class="chips"></div>
-    <div id="products" class="grid"></div>
-  </section>
+  <section class="hero"><span class="eyebrow">PREMIUM DIGITAL STORE</span><h1>Akun premium,<br><span>mudah & cepat.</span></h1><p>Pesan produk digital favoritmu langsung dari HP.</p><a href="#produk" class="primary">Lihat Produk</a></section>
+  <section class="trust"><div>✓ Proses mudah</div><div>✓ Harga terjangkau</div><div>✓ Ada garansi*</div></section>
+  <section id="produk" class="catalog"><div class="section-head"><div><span class="eyebrow">KATALOG</span><h2>Produk Premium</h2></div><span id="productTotal" class="muted"></span></div><input id="search" class="search" placeholder="Cari produk..." autocomplete="off"><div id="categories" class="chips"></div><div id="products" class="grid"></div></section>
 </main>
-
-<div class="bottom-nav">
-  <a href="#" class="active">⌂<span>Home</span></a>
-  <a href="#produk">▦<span>Produk</span></a>
-  <button id="bottomCart">🛒<span>Keranjang</span><b id="bottomCount">0</b></button>
-  <a href="#kontak">✆<span>Kontak</span></a>
-</div>
-
-<section id="kontak" class="contact">
-  <span class="eyebrow">ORDER</span>
-  <h2>Butuh bantuan?</h2>
-  <p>Order langsung melalui WhatsApp atau Telegram.</p>
-  <div class="contact-actions">
-    <a class="primary" href="https://wa.me/6282319524232" target="_blank">WhatsApp</a>
-    <a class="secondary" href="https://t.me/palugadashop30" target="_blank">Telegram</a>
-  </div>
-</section>
-
-<!-- Admin -->
-<div class="modal-backdrop" id="adminBackdrop">
-  <section class="admin-panel" role="dialog" aria-modal="true">
-    <div class="admin-head">
-      <div><span class="eyebrow">MANAJEMEN TOKO</span><h2>Panel Admin</h2></div>
-      <button class="close-btn" id="closeAdmin">✕</button>
-    </div>
-
-    <div class="admin-toolbar">
-      <input id="adminSearch" class="search" placeholder="Cari produk untuk diedit...">
-      <button class="primary dark" id="addProductBtn">＋ Tambah Produk</button>
-    </div>
-
-    <div id="adminProducts" class="admin-products"></div>
-  </section>
-</div>
-
-<!-- Product form -->
-<div class="modal-backdrop" id="formBackdrop">
-  <section class="form-panel" role="dialog" aria-modal="true">
-    <div class="admin-head">
-      <div><span class="eyebrow">PRODUK</span><h2 id="formTitle">Tambah Produk</h2></div>
-      <button class="close-btn" id="closeForm">✕</button>
-    </div>
-
-    <form id="productForm" class="product-form">
-      <input type="hidden" id="productId">
-      <div class="image-editor">
-        <div id="imagePreview" class="image-preview">Gambar</div>
-        <div class="image-actions">
-          <label class="upload-btn">＋ Tambah/Ganti Gambar
-            <input id="imageInput" type="file" accept="image/*" hidden>
-          </label>
-          <button type="button" class="secondary" id="removeImageBtn">Hapus Gambar</button>
-          <small>JPG, PNG, WEBP. Gambar disimpan di browser ini.</small>
-        </div>
-      </div>
-
-      <label>Nama Produk
-        <input id="nameInput" required maxlength="80" placeholder="Contoh: Netflix">
-      </label>
-      <label>Kategori
-        <input id="catInput" required maxlength="40" placeholder="Contoh: Streaming">
-      </label>
-      <label>Harga (Rp)
-        <input id="priceInput" required type="number" min="0" step="1000" placeholder="20000">
-      </label>
-      <label>Detail Produk
-        <textarea id="detailInput" maxlength="180" placeholder="1 Bulan • Garansi"></textarea>
-      </label>
-      <label>Ikon jika tanpa gambar
-        <input id="iconInput" maxlength="8" placeholder="N">
-      </label>
-
-      <div class="form-actions">
-        <button type="button" class="secondary" id="cancelForm">Batal</button>
-        <button type="submit" class="primary dark">Simpan Produk</button>
-      </div>
-    </form>
-  </section>
-</div>
-
-<div class="overlay" id="overlay"></div>
-<aside class="drawer" id="drawer">
-  <div class="drawer-head"><h2>Keranjang</h2><button id="closeCart">✕</button></div>
-  <div id="cartItems" class="cart-items"></div>
-  <div class="checkout">
-    <div class="total"><span>Total</span><strong id="cartTotal">Rp0</strong></div>
-    <input id="customerName" placeholder="Nama kamu">
-    <input id="customerWa" placeholder="Nomor WhatsApp">
-    <textarea id="customerNote" placeholder="Catatan (opsional)"></textarea>
-    <button class="primary full" id="checkoutBtn">Order via WhatsApp</button>
-    <small>Dengan melakukan order, kamu menyetujui syarat & ketentuan toko.</small>
-  </div>
-</aside>
-
+<div class="bottom-nav"><a href="#" class="active">⌂<span>Home</span></a><a href="#produk">▦<span>Produk</span></a><button id="bottomCart">🛒<span>Keranjang</span><b id="bottomCount">0</b></button><a href="#kontak">✆<span>Kontak</span></a></div>
+<section id="kontak" class="contact"><span class="eyebrow">ORDER</span><h2>Butuh bantuan?</h2><p>Order langsung melalui WhatsApp atau Telegram.</p><div class="contact-actions"><a class="primary" href="https://wa.me/6282319524232" target="_blank">WhatsApp</a><a class="secondary" href="https://t.me/palugadashop30" target="_blank">Telegram</a></div></section>
+<div class="modal-backdrop" id="adminBackdrop"><section class="admin-panel" role="dialog" aria-modal="true"><div class="admin-head"><div><span class="eyebrow">MANAJEMEN TOKO</span><h2>Panel Admin</h2></div><button class="close-btn" id="closeAdmin">✕</button></div><div class="admin-toolbar"><input id="adminSearch" class="search" placeholder="Cari produk untuk diedit..."><button class="primary dark" id="addProductBtn">＋ Tambah Produk</button></div><div id="adminProducts" class="admin-products"></div></section></div>
+<div class="modal-backdrop" id="formBackdrop"><section class="form-panel" role="dialog" aria-modal="true"><div class="admin-head"><div><span class="eyebrow">PRODUK</span><h2 id="formTitle">Tambah Produk</h2></div><button class="close-btn" id="closeForm">✕</button></div><form id="productForm" class="product-form"><input type="hidden" id="productId"><div class="image-editor"><div id="imagePreview" class="image-preview">Gambar</div><div class="image-actions"><label class="upload-btn">＋ Tambah/Ganti Gambar<input id="imageInput" type="file" accept="image/*" hidden></label><button type="button" class="secondary" id="removeImageBtn">Hapus Gambar</button><small>JPG, PNG, WEBP. Gambar disimpan di browser ini.</small></div></div><label>Nama Produk<input id="nameInput" required maxlength="80" placeholder="Contoh: Netflix"></label><label>Kategori<input id="catInput" required maxlength="40" placeholder="Contoh: Streaming"></label><label>Harga (Rp)<input id="priceInput" required type="number" min="0" step="1000" placeholder="20000"></label><label>Detail Produk<textarea id="detailInput" maxlength="180" placeholder="1 Bulan • Garansi"></textarea></label><label>Ikon jika tanpa gambar<input id="iconInput" maxlength="8" placeholder="N"></label><div class="form-actions"><button type="button" class="secondary" id="cancelForm">Batal</button><button type="submit" class="primary dark">Simpan Produk</button></div></form></section></div>
+<div class="overlay" id="overlay"></div><aside class="drawer" id="drawer"><div class="drawer-head"><h2>Keranjang</h2><button id="closeCart">✕</button></div><div id="cartItems" class="cart-items"></div><div class="checkout"><div class="total"><span>Total</span><strong id="cartTotal">Rp0</strong></div><input id="customerName" placeholder="Nama kamu"><input id="customerWa" placeholder="Nomor WhatsApp"><textarea id="customerNote" placeholder="Catatan (opsional)"></textarea><button class="primary full" id="checkoutBtn">Order via WhatsApp</button><small>Dengan melakukan order, kamu menyetujui syarat & ketentuan toko.</small></div></aside>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
