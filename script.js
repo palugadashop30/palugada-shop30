@@ -156,7 +156,8 @@ function renderAdmin(){
   `).join("") || `<div class="empty">Produk tidak ditemukan.</div>`;
 }
 
-function setCat(c){ activeCat=c; renderCats(); renderProducts(); }\nwindow.setCat=setCat;
+function setCat(c){ activeCat=c; renderCats(); renderProducts(); }
+window.setCat=setCat;
 
 function add(id){ window.addProductToCart(id); }
 
@@ -388,7 +389,8 @@ $("openCart").onclick=openCart;
 $("bottomCart").onclick=openCart;
 $("closeCart").onclick=closeCart;
 $("overlay").onclick=closeCart;
-$("search").oninput=renderProducts;\n$("categories").addEventListener("click",e=>{ const btn=e.target.closest(".chip"); if(btn) setCat(btn.dataset.category || "Semua"); });
+$("search").oninput=renderProducts;
+$("categories").addEventListener("click",e=>{ const btn=e.target.closest(".chip"); if(btn) setCat(btn.dataset.category || "Semua"); });
 window.addProductToCart=function(id){ openOptionPicker(id); };
 
 $("adminBackdrop").addEventListener("click",e=>{if(e.target===$("adminBackdrop"))closeAdmin()});
@@ -403,9 +405,17 @@ $("checkoutBtn").onclick=()=>{
   if(!cart.length)return alert("Keranjang masih kosong.");
   const name=$("customerName").value.trim(), wa=$("customerWa").value.trim(), note=$("customerNote").value.trim();
   if(!name||!wa)return alert("Isi nama dan nomor WhatsApp terlebih dahulu.");
-  const lines=cart.map(x=>`- ${x.name} | ${x.detail}${(x.addons||[]).length?` | Tambahan: ${x.addons.map(a=>a.name+` +${rp(a.price)}`).join(", ")}`:""} | ${x.qty}x | ${rp((x.price+(x.addons||[]).reduce((s,a)=>s+Number(a.price||0),0))*x.qty)}`).join("\n");
+  const lines=cart.map(x=>`- ${x.name} | ${x.detail}${(x.addons||[]).length?` | Tambahan: ${x.addons.map(a=>a.name+` +${rp(a.price)}`).join(", ")}`:""} | ${x.qty}x | ${rp((x.price+(x.addons||[]).reduce((s,a)=>s+Number(a.price||0),0))*x.qty)}`).join("
+");
   const total=rp(cart.reduce((s,x)=>s+x.price*x.qty,0));
-  const msg=`Halo PALUGADA SHOP30, saya ingin order:\n\n${lines}\n\nTotal: ${total}\nNama: ${name}\nWA: ${wa}${note?`\nCatatan: ${note}`:""}`;
+  const msg=`Halo PALUGADA SHOP30, saya ingin order:
+
+${lines}
+
+Total: ${total}
+Nama: ${name}
+WA: ${wa}${note?`
+Catatan: ${note}`:""}`;
   window.open("https://wa.me/6282319524232?text="+encodeURIComponent(msg),"_blank");
 };
 
@@ -428,9 +438,17 @@ $("checkoutBtn").onclick=()=>{
   if(!cart.length)return alert("Keranjang masih kosong.");
   const name=$("customerName").value.trim(), wa=$("customerWa").value.trim(), note=$("customerNote").value.trim();
   if(!name||!wa)return alert("Isi nama dan nomor WhatsApp terlebih dahulu.");
-  const lines=cart.map(x=>'- '+x.name+' | '+x.detail+((x.addons||[]).length?' | Tambahan: '+x.addons.map(a=>a.name+' +'+rp(a.price)).join(", "):"")+' | '+x.qty+'x | '+rp(cartItemTotal(x)*x.qty)).join("\n");
+  const lines=cart.map(x=>'- '+x.name+' | '+x.detail+((x.addons||[]).length?' | Tambahan: '+x.addons.map(a=>a.name+' +'+rp(a.price)).join(", "):"")+' | '+x.qty+'x | '+rp(cartItemTotal(x)*x.qty)).join("
+");
   const total=rp(cart.reduce((s,x)=>s+cartItemTotal(x)*x.qty,0));
-  const msg='Halo PALUGADA SHOP30, saya ingin order:\n\n'+lines+'\n\nTotal: '+total+'\nNama: '+name+'\nWA: '+wa+(note?'\nCatatan: '+note:"");
+  const msg='Halo PALUGADA SHOP30, saya ingin order:
+
+'+lines+'
+
+Total: '+total+'
+Nama: '+name+'
+WA: '+wa+(note?'
+Catatan: '+note:"");
   window.open("https://wa.me/6282319524232?text="+encodeURIComponent(msg),"_blank");
 };
 
