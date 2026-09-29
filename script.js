@@ -389,7 +389,7 @@ $("openCart").onclick=openCart;
 $("bottomCart").onclick=openCart;
 $("closeCart").onclick=closeCart;
 $("overlay").onclick=closeCart;
-$("search").oninput=renderProducts;\n$("categories").onclick=function(e){const b=e.target.closest(".chip");if(!b)return;setCat(b.getAttribute("data-cat")||"Semua");};
+$("search").oninput=renderProducts;
 window.addProductToCart=function(id){ openOptionPicker(id); };
 
 $("adminBackdrop").addEventListener("click",e=>{if(e.target===$("adminBackdrop"))closeAdmin()});
