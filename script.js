@@ -98,7 +98,7 @@ function renderProducts(){
       <h3>${escapeHtml(p.name)}</h3>
       <div class="meta">${escapeHtml(p.detail || "")}</div>
       <div class="price">${rp(p.price)}</div>
-      <button class="add" onclick="add('${p.id}')">+ Keranjang</button>
+      <button class="add" type="button" data-product-id="${escapeHtml(p.id)}">+ Keranjang</button>
     </article>
   `).join("") || `<div class="empty" style="grid-column:1/-1">Produk tidak ditemukan.</div>`;
 }
@@ -125,7 +125,7 @@ function renderAdmin(){
 function setCat(c){ activeCat=c; renderCats(); renderProducts(); }
 
 function add(id){
-  const p = products.find(x=>x.id===id);
+  const p = products.find(x=>String(x.id)===String(id));
   if(!p) return;
   cart.push({...p,id:Date.now()+Math.random(),qty:1});
   saveCart();
@@ -319,6 +319,7 @@ $("bottomCart").onclick=openCart;
 $("closeCart").onclick=closeCart;
 $("overlay").onclick=closeCart;
 $("search").oninput=renderProducts;
+$("products").addEventListener("click",e=>{ const btn=e.target.closest(".add"); if(btn) add(btn.dataset.productId); });
 
 $("adminBackdrop").addEventListener("click",e=>{if(e.target===$("adminBackdrop"))closeAdmin()});
 $("formBackdrop").addEventListener("click",e=>{if(e.target===$("formBackdrop"))closeForm()});
