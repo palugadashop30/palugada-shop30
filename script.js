@@ -109,7 +109,7 @@ async function removeProductFromSupabase(id){
 function renderCats(){
   const cats = ["Semua", ...new Set(products.map(p=>p.cat).filter(Boolean))];
   $("categories").innerHTML = cats.map(c =>
-    `<button class="chip ${c===activeCat?"active":""}" onclick="setCat(${JSON.stringify(c)})">${escapeHtml(c)}</button>`
+    `<button type="button" class="chip ${c===activeCat?"active":""}" data-category="${escapeHtml(c)}">${escapeHtml(c)}</button>`
   ).join("");
 }
 
@@ -156,7 +156,7 @@ function renderAdmin(){
   `).join("") || `<div class="empty">Produk tidak ditemukan.</div>`;
 }
 
-function setCat(c){ activeCat=c; renderCats(); renderProducts(); }
+function setCat(c){ activeCat=c; renderCats(); renderProducts(); }\nwindow.setCat=setCat;
 
 function add(id){ window.addProductToCart(id); }
 
@@ -388,7 +388,7 @@ $("openCart").onclick=openCart;
 $("bottomCart").onclick=openCart;
 $("closeCart").onclick=closeCart;
 $("overlay").onclick=closeCart;
-$("search").oninput=renderProducts;
+$("search").oninput=renderProducts;\n$("categories").addEventListener("click",e=>{ const btn=e.target.closest(".chip"); if(btn) setCat(btn.dataset.category || "Semua"); });
 window.addProductToCart=function(id){ openOptionPicker(id); };
 
 $("adminBackdrop").addEventListener("click",e=>{if(e.target===$("adminBackdrop"))closeAdmin()});
