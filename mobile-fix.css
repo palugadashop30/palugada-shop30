@@ -1,19 +1,35 @@
-/* Mobile admin and checkout fixes */
+/* Mobile-first layout fixes for PALUGADA SHOP30 */
+*{box-sizing:border-box}
+html,body{width:100%;max-width:100%;overflow-x:hidden}
 @media (max-width:699px){
-  .modal-backdrop{padding:0;align-items:stretch;overflow-y:auto;-webkit-overflow-scrolling:touch}
-  .modal-backdrop.show{align-items:stretch}
-  .admin-panel,.form-panel{width:100%;max-width:none;margin:0;border-radius:0;min-height:100dvh;box-shadow:none}
-  .admin-head{position:sticky;top:0;z-index:4;padding:13px 14px}
-  .admin-toolbar{padding:12px;display:flex;flex-direction:column;position:sticky;top:61px;z-index:3}
-  .admin-toolbar .primary{width:100%;min-height:44px;touch-action:manipulation}
-  .admin-products{padding:10px 12px 90px}
+  body{min-width:0}
+  .modal-backdrop{position:fixed;inset:0;width:100vw;height:100dvh;padding:0!important;display:none;align-items:flex-start!important;justify-content:stretch!important;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;z-index:1000}
+  .modal-backdrop.show{display:flex}
+  .admin-panel,.form-panel{width:100%!important;max-width:none!important;min-width:0!important;min-height:100dvh!important;height:auto!important;margin:0!important;border-radius:0!important;overflow:visible!important}
+  #checkoutBackdrop .form-panel{padding-bottom:calc(90px + env(safe-area-inset-bottom))}
+  #checkoutBackdrop .admin-head{position:sticky;top:0;background:inherit;z-index:20}
+  #checkoutBackdrop .checkout-summary,#checkoutBackdrop .checkout-form,#checkoutBackdrop #paymentArea{width:100%;max-width:100%;overflow:visible}
+  #checkoutBackdrop .checkout-form{display:flex;flex-direction:column;gap:10px}
+  #checkoutBackdrop .checkout-form input,#checkoutBackdrop .checkout-form textarea{width:100%;min-width:0;font-size:16px}
+  #paymentArea{padding:0 14px 20px}
+  #paymentArea>div{width:100%;max-width:100%}
+  #qrisPaymentBox{width:100%!important;max-width:100%!important;overflow:hidden!important;padding:12px!important}
+  #qrisPaymentBox img{display:block!important;width:100%!important;max-width:420px!important;height:auto!important;max-height:none!important;object-fit:contain!important;margin:10px auto!important}
+  #qrisPaymentBox .qris-total{font-size:16px;font-weight:800;margin-top:8px}
+  #checkoutBackdrop .form-actions{position:sticky;bottom:0;z-index:30;background:rgba(11,18,32,.97);padding:10px 14px calc(10px + env(safe-area-inset-bottom));margin:0!important}
+  #checkoutBackdrop .form-actions button{width:100%;min-height:48px;font-size:15px;touch-action:manipulation}
+  .admin-head{position:sticky;top:0;z-index:20;padding:13px 14px}
+  .admin-toolbar{padding:12px;display:flex;flex-direction:column;gap:8px;position:sticky;top:61px;z-index:15}
+  .admin-toolbar .search,.admin-toolbar .primary{width:100%;min-height:44px;touch-action:manipulation}
+  .admin-products{padding:10px 12px calc(90px + env(safe-area-inset-bottom))}
   .admin-card{display:grid;grid-template-columns:52px minmax(0,1fr);gap:9px;align-items:center}
   .admin-image{width:52px;height:52px}
   .admin-actions{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:7px;width:100%;margin-top:2px}
-  .admin-actions button{min-height:44px;font-size:12px;touch-action:manipulation}
-  .form-panel .product-form{padding-bottom:100px}
+  .admin-actions button{width:100%;min-height:44px;font-size:12px;touch-action:manipulation}
+  .form-panel .product-form{padding:14px 14px calc(100px + env(safe-area-inset-bottom))}
   .form-actions button{min-height:44px;touch-action:manipulation}
-  .drawer{width:100%;max-width:none}
+  .drawer{width:100%!important;max-width:none!important}
   .checkout{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
   .full{min-height:46px}
 }
+@media (min-width:700px){.admin-panel,.form-panel{max-height:92dvh;overflow:auto}}
