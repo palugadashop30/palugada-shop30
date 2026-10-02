@@ -1,6 +1,10 @@
 /* Mobile-first layout fixes for PALUGADA SHOP30 */
 *{box-sizing:border-box}
 html,body{width:100%;max-width:100%;overflow-x:hidden}
+.payment-choice{margin-top:14px;padding:14px;border:1px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(255,255,255,.04)}
+.payment-option{display:flex;align-items:center;gap:10px;margin-top:10px;padding:12px;border:1px solid rgba(255,255,255,.16);border-radius:12px;cursor:pointer;touch-action:manipulation}
+.qris-box{margin-top:14px;padding:14px;border-radius:18px;background:#fff;text-align:center;color:#111;overflow:hidden}
+.qris-title{font-weight:800;font-size:18px}.qris-store{font-size:12px;color:#555;margin:4px 0 10px}.qris-box img{display:block;width:100%;max-width:520px;height:auto;max-height:none;object-fit:contain;margin:8px auto}.qris-total{font-size:16px;font-weight:800;margin-top:8px}.qris-note{font-size:12px;color:#555;margin-top:6px;line-height:1.45}
 @media (max-width:699px){
   body{min-width:0}
   .modal-backdrop{position:fixed;inset:0;width:100vw;height:100dvh;padding:0!important;display:none;align-items:flex-start!important;justify-content:stretch!important;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;z-index:1000}
@@ -13,9 +17,8 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   #checkoutBackdrop .checkout-form input,#checkoutBackdrop .checkout-form textarea{width:100%;min-width:0;font-size:16px}
   #paymentArea{padding:0 14px 20px}
   #paymentArea>div{width:100%;max-width:100%}
-  #qrisPaymentBox{width:100%!important;max-width:100%!important;overflow:hidden!important;padding:12px!important}
-  #qrisPaymentBox img{display:block!important;width:100%!important;max-width:420px!important;height:auto!important;max-height:none!important;object-fit:contain!important;margin:10px auto!important}
-  #qrisPaymentBox .qris-total{font-size:16px;font-weight:800;margin-top:8px}
+  .qris-box{width:100%!important;max-width:100%!important;padding:10px!important}
+  .qris-box img{width:100%!important;max-width:100%!important;height:auto!important;max-height:none!important;object-fit:contain!important;margin:8px auto!important}
   #checkoutBackdrop .form-actions{position:sticky;bottom:0;z-index:30;background:rgba(11,18,32,.97);padding:10px 14px calc(10px + env(safe-area-inset-bottom));margin:0!important}
   #checkoutBackdrop .form-actions button{width:100%;min-height:48px;font-size:15px;touch-action:manipulation}
   .admin-head{position:sticky;top:0;z-index:20;padding:13px 14px}
