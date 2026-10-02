@@ -43,7 +43,7 @@ async function loadProductsFromSupabase(){
     if(error) throw error;
     if(data){
       const dbProducts=data.filter(p=>p.active === true || p.active == null).map(p=>({
-        id:p.id,
+        id:String(p.id),
         name:p.name||"",
         cat:p.category||p.cat||"",
         price:Number(p.price||0),
@@ -126,7 +126,7 @@ async function removeProductFromSupabase(id){
     alert("Sesi admin tidak aktif. Silakan login admin lagi.");
     return false;
   }
-  const {error}=await supabaseClient.from("products").delete().eq("id",id);
+  const {error}=await supabaseClient.from("products").delete().eq("id",Number(id));
   if(error){ console.error(error); alert("Supabase menolak penghapusan: "+error.message); return false; }
   return true;
 }
@@ -370,7 +370,7 @@ $("productForm").addEventListener("submit", async e=>{
   if(!data.name || !data.cat) return alert("Nama dan kategori wajib diisi.");
 
   const existing=editingId ? products.find(p=>p.id===editingId) : null;
-  const product=editingId ? {...existing,...data,id:editingId} : {...data,id:"p"+Date.now()};
+  const product=editingId ? {...existing,...data,id:editingId} : {...data};
   const savedProduct=await saveProductToSupabase(product);
   if(!savedProduct) return;
   if(editingId){
