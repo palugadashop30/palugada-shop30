@@ -17,15 +17,9 @@ const defaultProducts = [
 
 let products = [...defaultProducts];
 try{
-  const saved=JSON.parse(localStorage.getItem("palugada_products") || "null");
-  if(Array.isArray(saved)){
-    const keys=new Set(products.map(p=>String(p.name).toLowerCase()+"|"+String(p.cat).toLowerCase()+"|"+String(p.detail).toLowerCase()));
-    saved.forEach(p=>{
-      const key=String(p.name||"").toLowerCase()+"|"+String(p.cat||"").toLowerCase()+"|"+String(p.detail||"").toLowerCase();
-      if(!keys.has(key)){ products.push(p); keys.add(key); }
-    });
-  }
-}catch(e){ console.warn("Local products:",e.message); }
+  const cached=JSON.parse(localStorage.getItem("palugada_products_cache") || "null");
+  if(Array.isArray(cached) && cached.length) products=cached;
+}catch(e){ console.warn("Local product cache:",e.message); }
 let cart = JSON.parse(localStorage.getItem("palugada_cart") || "[]");
 let activeCat = "Semua";
 let editingId = null;
@@ -34,7 +28,7 @@ let pendingImage = "";
 const rp = n => n ? new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(n) : "Hubungi admin";
 const $ = id => document.getElementById(id);
 
-function saveProducts(){ localStorage.setItem("palugada_products", JSON.stringify(products)); }
+function saveProducts(){ localStorage.setItem("palugada_products_cache", JSON.stringify(products)); }
 
 async function loadProductsFromSupabase(){
   if(typeof supabaseClient==="undefined") return;
@@ -53,23 +47,23 @@ async function loadProductsFromSupabase(){
         options:Array.isArray(p.options)?p.options:[]
       }));
 
-      const merged=new Map();
-      products.forEach(p=>{
-        const key=String(p.name||"").trim().toLowerCase()+"|"+String(p.cat||"").trim().toLowerCase()+"|"+String(p.detail||"").trim().toLowerCase();
-        merged.set(key,p);
-      });
-      dbProducts.forEach(p=>{
-        const key=String(p.name||"").trim().toLowerCase()+"|"+String(p.cat||"").trim().toLowerCase()+"|"+String(p.detail||"").trim().toLowerCase();
-        merged.set(key,p);
-      });
-
-      products=Array.from(merged.values());
-      saveProducts();
-      renderCats();
-      renderProducts();
-      renderAdmin();
+      if(dbProducts.length){
+        // Supabase is the source of truth. Do not merge stale default/local products
+        // into the live catalog; this prevents old products from reappearing.
+        products=dbProducts;
+        saveProducts();
+        renderCats();
+        renderProducts();
+        renderAdmin();
+      }
     }
-  }catch(e){ console.warn("Supabase products:",e.message); }
+  }catch(e){
+    console.warn("Supabase products:",e.message);
+    // Keep the cached catalog visible if Supabase is temporarily unavailable.
+    renderCats();
+    renderProducts();
+    renderAdmin();
+  }
 }
 async function getAdminSession(){
   if(typeof supabaseClient==="undefined") return null;
@@ -112,8 +106,9 @@ async function saveProductToSupabase(p){
     if(error) throw error;
     return {...p,id:data.id};
   }catch(error){
-    console.error(error);
-    alert("Supabase menolak penyimpanan: "+error.message);
+    console.error("Supabase save product:", error);
+    const detail=error?.message || error?.details || "Akses ditolak.";
+    alert("Gagal menyimpan produk ke Supabase.\n\n"+detail+"\n\nPastikan login admin masih aktif.");
     return false;
   }
 }
@@ -127,7 +122,11 @@ async function removeProductFromSupabase(id){
     return false;
   }
   const {error}=await supabaseClient.from("products").delete().eq("id",Number(id));
-  if(error){ console.error(error); alert("Supabase menolak penghapusan: "+error.message); return false; }
+  if(error){
+    console.error("Supabase delete product:", error);
+    alert("Gagal menghapus produk dari Supabase.\n\n"+(error.message||"Akses ditolak.")+"\n\nPastikan login admin masih aktif.");
+    return false;
+  }
   return true;
 }
 
