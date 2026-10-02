@@ -71,8 +71,27 @@ async function loadProductsFromSupabase(){
     }
   }catch(e){ console.warn("Supabase products:",e.message); }
 }
+async function getAdminSession(){
+  if(typeof supabaseClient==="undefined") return null;
+  try{
+    let {data:{session}}=await supabaseClient.auth.getSession();
+    if(session) return session;
+    const {data,error}=await supabaseClient.auth.refreshSession();
+    if(error) return null;
+    return data?.session || null;
+  }catch(e){
+    console.error("Admin session:",e);
+    return null;
+  }
+}
+
 async function saveProductToSupabase(p){
   if(typeof supabaseClient==="undefined") return p;
+  const session=await getAdminSession();
+  if(!session){
+    alert("Sesi admin tidak aktif. Silakan login admin lagi.");
+    return false;
+  }
   const row={
     name:p.name,
     category:p.cat,
@@ -101,6 +120,12 @@ async function saveProductToSupabase(p){
 
 async function removeProductFromSupabase(id){
   if(typeof supabaseClient==="undefined") return true;
+  if(String(id).startsWith("p")) return true;
+  const session=await getAdminSession();
+  if(!session){
+    alert("Sesi admin tidak aktif. Silakan login admin lagi.");
+    return false;
+  }
   const {error}=await supabaseClient.from("products").delete().eq("id",id);
   if(error){ console.error(error); alert("Supabase menolak penghapusan: "+error.message); return false; }
   return true;
@@ -198,7 +223,7 @@ function openCart(){ $("drawer").classList.add("open"); $("overlay").classList.a
 function closeCart(){ $("drawer").classList.remove("open"); $("overlay").classList.remove("show"); }
 
 async function openAdmin(){
-  const {data:{session}}=await supabaseClient.auth.getSession();
+  const session=await getAdminSession();
   if(!session){
     $("loginError").textContent="";
     $("loginBackdrop").classList.add("show");
@@ -380,7 +405,9 @@ $("loginForm").addEventListener("submit",async e=>{
     email:$("loginEmail").value.trim(),
     password:$("loginPassword").value
   });
-  if(error){$("loginError").textContent="Email atau password salah.";return;}
+  if(error){$("loginError").textContent=error.message || "Email atau password salah.";return;}
+  const sessionCheck=await getAdminSession();
+  if(!sessionCheck){$("loginError").textContent="Login berhasil tetapi sesi admin belum aktif. Coba login lagi.";return;}
   closeLogin();
   openAdmin();
 });
