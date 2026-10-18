@@ -12,7 +12,7 @@
     const form=document.querySelector('#checkoutBackdrop .checkout-form');
     if(!summary||!form)return;
 
-    summary.innerHTML=`<div class="summary-box"><b>Ringkasan Pesanan</b>${items.map(x=>`<div>• ${esc(x.name)} — ${x.qty}x — ${money(itemTotal(x))}</div>`).join('')}<hr><strong>Total: ${money(total())}</strong></div>`;
+    summary.innerHTML=`<div class="summary-box"><b>Ringkasan Pesanan</b>${items.map(x=>`<div style="padding:8px 0;border-bottom:1px solid #eef0f3"><b>• ${esc(x.name)}</b><br>Jumlah: ${Number(x.qty)||0}x<br>Harga dasar: ${money(x.price)}${Array.isArray(x.addons)&&x.addons.length?`<br>Tambahan / topping:${x.addons.map(a=>`<br>＋ ${esc(a.name)}: +${money(a.price)}${Number(x.qty)>1?` per item (total ${money((Number(a.price)||0)*(Number(x.qty)||0))})`:''}`).join('')}`:'<br>Tambahan / topping: Tidak ada'}<br><b>Total produk: ${money(itemTotal(x))}</b></div>`).join('')}<hr><strong>Total: ${money(total())}</strong></div>`;
 
     let area=document.getElementById('paymentArea');
     if(!area){area=document.createElement('div');area.id='paymentArea';form.insertAdjacentElement('afterend',area);}
@@ -60,8 +60,33 @@
     const wa=document.getElementById('customerWa').value.trim();
     const note=document.getElementById('customerNote').value.trim();
     if(!name||!wa){alert('Isi nama dan nomor WhatsApp terlebih dahulu.');return;}
-    const lines=items.map(x=>`- ${x.name} | ${x.qty}x | ${money(itemTotal(x))}`).join('\n');
-    const msg=`Halo PALUGADA SHOP30, saya ingin konfirmasi order setelah pembayaran QRIS:\n\n${lines}\n\nTotal: ${money(total())}\nPembayaran: QRIS\nNama: ${name}\nWA: ${wa}${note?'\nCatatan: '+note:''}`;
+    const lines=items.map(x=>{
+      const qty=Number(x.qty)||0;
+      const addons=Array.isArray(x.addons)?x.addons:[];
+      const detail=[
+        `- ${x.name}`,
+        `  Jumlah: ${qty}x`,
+        `  Harga dasar: ${money(x.price)}`,
+        ...(addons.length
+          ? addons.map(a=>`  + Tambahan/topping ${a.name}: +${money(a.price)}${qty>1?` per item (total ${money((Number(a.price)||0)*qty)})`:''}`)
+          : ['  Tambahan/topping: Tidak ada']),
+        `  Total produk: ${money(itemTotal(x))}`
+      ];
+      return detail.join('\
+');
+    }).join('\
+\
+');
+    const msg=`Halo PALUGADA SHOP30, saya ingin konfirmasi order setelah pembayaran QRIS:\
+\
+RINCIAN PESANAN:\
+${lines}\
+\
+TOTAL PEMBAYARAN: ${money(total())}\
+Pembayaran: QRIS\
+Nama: ${name}\
+WA: ${wa}${note?'\
+Catatan: '+note:''}`;
     window.open('https://wa.me/6282319524232?text='+encodeURIComponent(msg),'_blank');
   }
 
