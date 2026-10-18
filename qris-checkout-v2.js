@@ -74,19 +74,19 @@
       ];
       return detail.join('\n');
     }).join('\n\n------------------------------\n\n');
-    const msg=`Halo PALUGADA SHOP30,
+    const msg = `Halo PALUGADA SHOP30,
 
 Saya ingin konfirmasi order setelah pembayaran QRIS.
 
 RINCIAN PESANAN
 ------------------------------
-\${lines}
+${lines}
 
 ==============================
-TOTAL PEMBAYARAN: \${money(total())}
+TOTAL PEMBAYARAN: ${money(total())}
 Pembayaran : QRIS
-Nama       : \${name}
-WA         : \${wa}\${note?'\nCatatan    : '+note:''}\`;
+Nama       : ${name}
+WA         : ${wa}${note ? '\nCatatan    : ' + note : ''}`;
     window.open('https://wa.me/6282319524232?text='+encodeURIComponent(msg),'_blank');
   }
 
