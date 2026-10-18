@@ -65,15 +65,15 @@
       const addons=Array.isArray(x.addons)?x.addons:[];
       const detail=[
         x.name,
-        \`Jumlah       : \${qty}x\`,
-        \`Harga dasar  : \${money(x.price)}\`,
+        `Jumlah       : ${qty}x`,
+        `Harga dasar  : ${money(x.price)}`,
         ...(addons.length
-          ? addons.map(a=>\`Tambahan/topping: \${a.name} (+\${money(a.price)})\${qty>1?\` per item; total tambahan \${money((Number(a.price)||0)*qty)}\`:''}\`)
+          ? addons.map(a=>`Tambahan/topping: ${a.name} (+${money(a.price)})${qty>1?` per item; total tambahan ${money((Number(a.price)||0)*qty)}`:''}`)
           : ['Tambahan/topping: Tidak ada']),
-        \`Total produk : \${money(itemTotal(x))}\`
+        `Total produk : ${money(itemTotal(x))}`
       ];
-      return detail.join('\n');
-    }).join('\n\n------------------------------\n\n');
+      return detail.join('\\n');
+    }).join('\\n\\n------------------------------\\n\\n');
     const msg=\`Halo PALUGADA SHOP30,
 
 Saya ingin konfirmasi order setelah pembayaran QRIS.
