@@ -64,29 +64,29 @@
       const qty=Number(x.qty)||0;
       const addons=Array.isArray(x.addons)?x.addons:[];
       const detail=[
-        `- ${x.name}`,
-        `  Jumlah: ${qty}x`,
-        `  Harga dasar: ${money(x.price)}`,
+        x.name,
+        \`Jumlah       : \${qty}x\`,
+        \`Harga dasar  : \${money(x.price)}\`,
         ...(addons.length
-          ? addons.map(a=>`  + Tambahan/topping ${a.name}: +${money(a.price)}${qty>1?` per item (total ${money((Number(a.price)||0)*qty)})`:''}`)
-          : ['  Tambahan/topping: Tidak ada']),
-        `  Total produk: ${money(itemTotal(x))}`
+          ? addons.map(a=>\`Tambahan/topping: \${a.name} (+\${money(a.price)})\${qty>1?\` per item; total tambahan \${money((Number(a.price)||0)*qty)}\`:''}\`)
+          : ['Tambahan/topping: Tidak ada']),
+        \`Total produk : \${money(itemTotal(x))}\`
       ];
-      return detail.join('\
-');
-    }).join('\
-\
-');
-    const msg=`Halo PALUGADA SHOP30, saya ingin konfirmasi order setelah pembayaran QRIS:\
-\
-RINCIAN PESANAN:\
-${lines}\
-\
-TOTAL PEMBAYARAN: ${money(total())}\
-Pembayaran: QRIS\
-Nama: ${name}\
-WA: ${wa}${note?'\
-Catatan: '+note:''}`;
+      return detail.join('\n');
+    }).join('\n\n------------------------------\n\n');
+    const msg=\`Halo PALUGADA SHOP30,
+
+Saya ingin konfirmasi order setelah pembayaran QRIS.
+
+RINCIAN PESANAN
+------------------------------
+\${lines}
+
+==============================
+TOTAL PEMBAYARAN: \${money(total())}
+Pembayaran : QRIS
+Nama       : \${name}
+WA         : \${wa}\${note?'\nCatatan    : '+note:''}\`;
     window.open('https://wa.me/6282319524232?text='+encodeURIComponent(msg),'_blank');
   }
 
