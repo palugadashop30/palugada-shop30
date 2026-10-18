@@ -72,9 +72,9 @@
           : ['Tambahan/topping: Tidak ada']),
         `Total produk : ${money(itemTotal(x))}`
       ];
-      return detail.join('\\n');
-    }).join('\\n\\n------------------------------\\n\\n');
-    const msg=\`Halo PALUGADA SHOP30,
+      return detail.join('\n');
+    }).join('\n\n------------------------------\n\n');
+    const msg=`Halo PALUGADA SHOP30,
 
 Saya ingin konfirmasi order setelah pembayaran QRIS.
 
