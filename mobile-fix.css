@@ -36,3 +36,23 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
   .full{min-height:46px}
 }
 @media (min-width:700px){.admin-panel,.form-panel{max-height:92dvh;overflow:auto}}
+
+
+/* Product catalog: square image frame, show the entire image without cropping. */
+#products.grid .card{min-width:0;}
+#products.grid .card>img{
+  display:block;
+  width:100%;
+  height:auto!important;
+  aspect-ratio:1 / 1;
+  object-fit:contain!important;
+  object-position:center;
+  padding:0;
+  margin:0 auto 11px;
+  background:#fff;
+  border-radius:12px;
+}
+#products.grid .card>h3,
+#products.grid .card>.meta,
+#products.grid .card>.price,
+#products.grid .card>.add{position:relative;}
