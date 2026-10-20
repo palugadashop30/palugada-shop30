@@ -56,3 +56,22 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 #products.grid .card>.meta,
 #products.grid .card>.price,
 #products.grid .card>.add{position:relative;}
+
+
+/* Larger catalog photos on phones: square cards with minimal inner margins. */
+#products.grid{gap:10px;}
+#products.grid .card{padding:7px;border-radius:14px;}
+#products.grid .card>img{
+  width:100%;
+  aspect-ratio:1 / 1;
+  height:auto!important;
+  object-fit:contain!important;
+  margin:0 auto 9px;
+  border-radius:10px;
+}
+@media(max-width:700px){
+  #products.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  #products.grid .card{padding:6px;}
+  #products.grid .card>img{width:100%;aspect-ratio:1/1;height:auto!important;}
+  #products.grid .card h3{font-size:14px;line-height:1.35;}
+}
