@@ -41,25 +41,26 @@ body.modal-open{overflow:hidden}
 .edit-cart{width:100%;margin-top:9px;border:1px solid #dce1e8;background:#fff;border-radius:9px;padding:8px;font-size:11px;font-weight:800;cursor:pointer}.checkout-summary{padding:18px;background:#f7f8fa}.summary-box{background:#fff;border:1px solid #e3e7ed;border-radius:14px;padding:14px;font-size:12px;line-height:1.7}.summary-box hr{border:0;border-top:1px solid #e5e7eb;margin:10px 0}.checkout-form{padding:0 18px 8px;background:#fff}.checkout-form input,.checkout-form textarea{display:block;width:100%;margin:8px 0;padding:12px;border:1px solid #dce1e8;border-radius:10px;font:inherit;font-size:13px}.checkout-form textarea{min-height:65px;resize:vertical}
 
 
-/* Full-size product photos: larger display area, image never cropped. */
+/* Product cards: show each product photo large and completely uncropped. */
 .card>img{
   display:block;
   width:100%;
-  height:360px;
-  aspect-ratio:4 / 5;
+  height:460px;
+  aspect-ratio:auto;
   object-fit:contain;
   object-position:center;
   padding:0;
+  margin:0 auto 11px;
   box-sizing:border-box;
   background:#fff;
   border:0;
   border-radius:14px;
 }
 @media(max-width:700px){
-  .card>img{height:clamp(245px, 72vw, 330px);padding:0}
+  .card>img{height:clamp(320px, 94vw, 410px);padding:0}
 }
 @media(max-width:380px){
-  .card>img{height:clamp(225px, 70vw, 285px)}
+  .card>img{height:clamp(290px, 90vw, 360px)}
 }
 .admin-image{
   object-fit:contain;
