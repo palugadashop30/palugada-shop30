@@ -29,7 +29,7 @@ async function saveProductToSupabase(p){if(typeof supabaseClient==="undefined")r
 async function removeProductFromSupabase(id){if(typeof supabaseClient==="undefined")return true;if(String(id).startsWith("p"))return true;const session=await getAdminSession();if(!session){alert("Sesi admin tidak aktif. Silakan login admin lagi.");return false;}const{error}=await supabaseClient.from("products").delete().eq("id",Number(id));if(error){alert("Gagal menghapus produk dari Supabase.\n\n"+(error.message||"Akses ditolak."));return false;}return true;}
 function renderCats(){const cats=["Semua",...new Set(products.map(p=>p.cat).filter(Boolean))];$("categories").innerHTML=cats.map(c=>`<button type="button" class="chip ${c===activeCat?"active":""}" onclick="window.setCat('${String(c).replace(/'/g,"\\'")}')">${escapeHtml(c)}</button>`).join("");}
 function productVisual(p,cls=""){return p.image?`<img class="${cls}" src="${p.image}" alt="${escapeHtml(p.name)}">`:`<div class="icon ${cls}">${escapeHtml(p.icon||p.name.slice(0,2).toUpperCase())}</div>`;}
-function renderProducts(){const q=$("search").value.toLowerCase();const list=products.filter(p=>(activeCat==="Semua"||p.cat===activeCat)&&`${p.name} ${p.cat} ${p.detail}`.toLowerCase().includes(q));$("productTotal").textContent=`${list.length} produk`;$("products").innerHTML=list.map(p=>`<article class="card">${productVisual(p)}<h3>${escapeHtml(p.name)}</h3><div class="meta">${escapeHtml(p.detail||"")}</div><div class="price">${rp(p.price)}</div><button class="add" type="button" onclick="window.addProductToCart(this.dataset.id)" data-id="${String(p.id)}">${(p.options||[]).length?"+ Pilih & Keranjang":"+ Keranjang"}</button></article>`).join("")||`<div class="empty" style="grid-column:1/-1">Produk tidak ditemukan.</div>`;}
+function renderProducts(){const q=$("search").value.toLowerCase();const list=products.filter(p=>(activeCat==="Semua"||p.cat===activeCat)&&`${p.name} ${p.cat} ${p.detail}`.toLowerCase().includes(q));$("productTotal").textContent=`${list.length} produk`;$("products").innerHTML=list.map(p=>`<article class="card">${productVisual(p)}<h3>${escapeHtml(p.name)}</h3><div class="meta">${escapeHtml(p.detail||"")}</div><div class="price">${rp(p.price)}</div><button class="add" type="button" data-product-add="1" data-id="${escapeHtml(String(p.id))}">${(p.options||[]).length?"+ Pilih & Keranjang":"+ Keranjang"}</button></article>`).join("")||`<div class="empty" style="grid-column:1/-1">Produk tidak ditemukan.</div>`;}
 function renderAdmin(){const q=$("adminSearch").value.toLowerCase();const list=products.filter(p=>`${p.name} ${p.cat} ${p.detail}`.toLowerCase().includes(q));$("adminProducts").innerHTML=list.map(p=>`<article class="admin-card">${productVisual(p,"admin-image")}<div class="admin-info"><strong>${escapeHtml(p.name)}</strong><span>${escapeHtml(p.cat)} • ${rp(p.price)}</span><small>${escapeHtml(p.detail||"Tanpa detail")}</small></div><div class="admin-actions"><button type="button" onclick='window.editProduct("${String(p.id).replace(/"/g,"&quot;")}")'>✏ Edit</button><button type="button" class="danger" onclick='window.deleteProduct("${String(p.id).replace(/"/g,"&quot;")}")'>🗑 Hapus</button></div></article>`).join("")||`<div class="empty">Produk tidak ditemukan.</div>`;}
 window.editProduct=editProduct;window.deleteProduct=deleteProduct;function setCat(c){activeCat=c;renderCats();renderProducts();}window.setCat=setCat;
 function saveCart(){syncCart();renderCart();}
@@ -58,6 +58,33 @@ $("imageInput").addEventListener("change",e=>readImage(e.target.files[0]));$("re
 $("loginForm").addEventListener("submit",async e=>{e.preventDefault();const email=$("loginEmail").value.trim(),password=$("loginPassword").value;const{error}=await supabaseClient.auth.signInWithPassword({email,password});if(error){$("loginError").textContent=error.message;return;}closeLogin();openAdmin();});
 $("logoutBtn").addEventListener("click",async()=>{await supabaseClient.auth.signOut();closeAdmin();});
 function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));}
-window.addProductToCart=function(id){const p=products.find(x=>String(x.id)===String(id));if(!p)return;const opts=Array.isArray(p.options)?p.options:[];if(opts.length){openOptionPicker(p.id);return;}cart.push({...p,productId:p.id,id:Date.now()+Math.random(),qty:1,addons:[]});saveCart();const btn=Array.from(document.querySelectorAll(".add[data-id]")).find(b=>String(b.dataset.id)===String(id));if(btn){const oldText=btn.textContent;btn.textContent="✓ Ditambahkan";btn.disabled=true;setTimeout(()=>{btn.textContent=oldText;btn.disabled=false;},900);}};
+window.addProductToCart=function(id){
+  const p=products.find(x=>String(x.id)===String(id));
+  if(!p){console.warn("Produk tidak ditemukan untuk tombol keranjang:",id);return false;}
+  const opts=Array.isArray(p.options)?p.options:[];
+  if(opts.length){openOptionPicker(p.id);return true;}
+  cart.push({...p,productId:p.id,id:Date.now()+Math.random(),qty:1,addons:[]});
+  saveCart();
+  const btn=Array.from(document.querySelectorAll("#products .add[data-product-add]")).find(b=>String(b.dataset.id)===String(id));
+  if(btn){
+    const oldText=btn.textContent;
+    btn.textContent="✓ Ditambahkan";
+    btn.disabled=true;
+    window.setTimeout(()=>{if(btn.isConnected){btn.textContent=oldText;btn.disabled=false;}},900);
+  }
+  return true;
+};
+// Delegated click handling survives product grid re-renders, filtering and category changes.
+const productGrid=$("products");
+if(productGrid&&!productGrid.dataset.cartClickBound){
+  productGrid.dataset.cartClickBound="1";
+  productGrid.addEventListener("click",function(event){
+    const button=event.target.closest("button[data-product-add][data-id]");
+    if(!button||!productGrid.contains(button))return;
+    event.preventDefault();
+    if(button.disabled)return;
+    window.addProductToCart(button.dataset.id);
+  });
+}
 window.addEventListener("pageshow",()=>{try{cart=JSON.parse(localStorage.getItem("palugada_cart")||"[]");window.cart=cart;}catch(e){cart=[];window.cart=cart;}renderCart();});document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeCart();closeOptionPicker();}});
 renderCats();renderProducts();renderCart();loadProductsFromSupabase();
