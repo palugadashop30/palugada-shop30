@@ -74,17 +74,16 @@ window.addProductToCart=function(id){
   }
   return true;
 };
-// Delegated click handling survives product grid re-renders, filtering and category changes.
-const productGrid=$("products");
-if(productGrid&&!productGrid.dataset.cartClickBound){
-  productGrid.dataset.cartClickBound="1";
-  productGrid.addEventListener("click",function(event){
-    const button=event.target.closest("button[data-product-add][data-id]");
-    if(!button||!productGrid.contains(button))return;
-    event.preventDefault();
-    if(button.disabled)return;
-    window.addProductToCart(button.dataset.id);
-  });
-}
+// Capture product-cart clicks early so overlays/other handlers cannot swallow taps.
+document.addEventListener("click",function(event){
+  const target=event.target;
+  if(!target||typeof target.closest!=="function")return;
+  const button=target.closest("#products button[data-product-add][data-id]");
+  if(!button)return;
+  event.preventDefault();
+  event.stopPropagation();
+  if(button.disabled)return;
+  window.addProductToCart(button.dataset.id);
+},true);
 window.addEventListener("pageshow",()=>{try{cart=JSON.parse(localStorage.getItem("palugada_cart")||"[]");window.cart=cart;}catch(e){cart=[];window.cart=cart;}renderCart();});document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeCart();closeOptionPicker();}});
 renderCats();renderProducts();renderCart();loadProductsFromSupabase();
