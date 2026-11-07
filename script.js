@@ -23,10 +23,75 @@ const rp=n=>n?new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",max
 const $=id=>document.getElementById(id);
 function saveProducts(){localStorage.setItem("palugada_products_cache",JSON.stringify(products));}
 function syncCart(){window.cart=cart;try{localStorage.setItem("palugada_cart",JSON.stringify(cart));}catch(e){console.warn("Keranjang tidak dapat disimpan di browser:",e.message);}}
-async function loadProductsFromSupabase(){try{if(typeof supabaseClient==="undefined")throw new Error("Supabase client belum siap");const{data,error}=await supabaseClient.from("products").select("*").order("created_at",{ascending:false});if(error)throw error;const dbProducts=(data||[]).map(p=>({id:String(p.id),name:p.name||"",cat:p.category||p.cat||"",price:Number(p.price||0),detail:p.detail||"",icon:p.icon||"",image:p.image_url||p.image||"",options:Array.isArray(p.options)?p.options:[]}));if(dbProducts.length){products=dbProducts;saveProducts();}else{const cached=JSON.parse(localStorage.getItem("palugada_products_cache")||"null");if(Array.isArray(cached)&&cached.length)products=cached;}renderCats();renderProducts();renderCart();renderAdmin();}catch(e){console.warn("Supabase products:",e.message);try{const cached=JSON.parse(localStorage.getItem("palugada_products_cache")||"null");if(Array.isArray(cached)&&cached.length)products=cached;}catch(_){}renderCats();renderProducts();renderCart();renderAdmin();const total=$("productTotal");if(total)total.textContent=products.length+" produk (mode cadangan)";}}
+let productLoadVersion=0;
+let productsRealtimeChannel=null;
+let productsRealtimeStatus="CONNECTING";
+let realtimeRefreshTimer=null;
+async function loadProductsFromSupabase(){
+ const requestVersion=++productLoadVersion;
+ try{
+  if(typeof supabaseClient==="undefined")throw new Error("Supabase client belum siap");
+  const{data,error}=await supabaseClient.from("products").select("*").order("created_at",{ascending:false});
+  if(error)throw error;
+  if(requestVersion!==productLoadVersion)return;
+  products=(data||[]).map(p=>({id:String(p.id),name:p.name||"",cat:p.category||p.cat||"",price:Number(p.price||0),detail:p.detail||"",icon:p.icon||"",image:p.image_url||p.image||"",options:Array.isArray(p.options)?p.options:[]}));
+  saveProducts();renderCats();renderProducts();renderCart();renderAdmin();
+  const total=$("productTotal");if(total)total.textContent=products.length+" produk";
+  return products;
+ }catch(e){
+  if(requestVersion!==productLoadVersion)return;
+  console.warn("Supabase products:",e.message);
+  // Cache hanya dipakai saat query gagal; hasil kosong dari database tetap dianggap data resmi.
+  try{const cached=JSON.parse(localStorage.getItem("palugada_products_cache")||"null");if(Array.isArray(cached))products=cached;}catch(_){}
+  renderCats();renderProducts();renderCart();renderAdmin();
+  const total=$("productTotal");if(total)total.textContent=products.length+" produk (mode cadangan)";
+  throw e;
+ }
+}
+function scheduleProductsRefresh(){
+ if(realtimeRefreshTimer)clearTimeout(realtimeRefreshTimer);
+ realtimeRefreshTimer=setTimeout(()=>{realtimeRefreshTimer=null;loadProductsFromSupabase().catch(e=>console.warn("Refresh Realtime gagal:",e.message));},180);
+}
+function startProductsRealtime(){
+ if(productsRealtimeChannel||typeof supabaseClient==="undefined")return;
+ productsRealtimeChannel=supabaseClient.channel("palugada-shop30-products-live")
+  .on("postgres_changes",{event:"*",schema:"public",table:"products"},payload=>{
+   console.info("Perubahan produk diterima dari Supabase Realtime:",payload.eventType);
+   scheduleProductsRefresh();
+  })
+  .subscribe(status=>{
+   productsRealtimeStatus=status;console.info("Status sinkronisasi produk:",status);
+   if(status==="SUBSCRIBED")loadProductsFromSupabase().catch(e=>console.warn("Sinkronisasi awal Realtime:",e.message));
+  });
+}
+window.addEventListener("focus",()=>loadProductsFromSupabase().catch(()=>{}));
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)loadProductsFromSupabase().catch(()=>{});});
 async function getAdminSession(){if(typeof supabaseClient==="undefined")return null;try{let{data:{session}}=await supabaseClient.auth.getSession();if(session)return session;const{data,error}=await supabaseClient.auth.refreshSession();if(error)return null;return data?.session||null;}catch(e){return null;}}
-async function saveProductToSupabase(p){if(typeof supabaseClient==="undefined")return p;const session=await getAdminSession();if(!session){alert("Sesi admin tidak aktif. Silakan login admin lagi.");return false;}const row={name:p.name,category:p.cat,price:p.price,detail:p.detail,image_url:p.image||null,active:p.active!==false,sort_order:Number(p.sort_order||0),options:Array.isArray(p.options)?p.options:[]};try{if(p.id&&!String(p.id).startsWith("p")){const{data,error}=await supabaseClient.from("products").update(row).eq("id",p.id).select().single();if(error)throw error;return{...p,id:data.id};}const{data,error}=await supabaseClient.from("products").insert(row).select().single();if(error)throw error;return{...p,id:data.id};}catch(error){alert("Gagal menyimpan produk ke Supabase.\n\n"+(error?.message||"Akses ditolak."));return false;}}
-async function removeProductFromSupabase(id){if(typeof supabaseClient==="undefined")return true;if(String(id).startsWith("p"))return true;const session=await getAdminSession();if(!session){alert("Sesi admin tidak aktif. Silakan login admin lagi.");return false;}const{error}=await supabaseClient.from("products").delete().eq("id",Number(id));if(error){alert("Gagal menghapus produk dari Supabase.\n\n"+(error.message||"Akses ditolak."));return false;}return true;}
+async function saveProductToSupabase(p){
+ if(typeof supabaseClient==="undefined"){alert("Koneksi database belum siap.");return false;}
+ const session=await getAdminSession();if(!session){alert("Sesi admin tidak aktif. Silakan login admin lagi.");return false;}
+ const row={name:p.name,category:p.cat,price:p.price,detail:p.detail,image_url:p.image||null,active:p.active!==false,sort_order:Number(p.sort_order||0),options:Array.isArray(p.options)?p.options:[]};
+ try{
+  let query;
+  if(p.id&&!String(p.id).startsWith("p"))query=supabaseClient.from("products").update(row).eq("id",p.id);
+  else query=supabaseClient.from("products").insert(row);
+  const{data,error}=await query.select("*").single();if(error)throw error;
+  if(!data||data.id===undefined||data.id===null)throw new Error("Database tidak mengembalikan data produk setelah simpan.");
+  const saved={...p,id:String(data.id),name:data.name||p.name,cat:data.category||data.cat||p.cat,price:Number(data.price??p.price),detail:data.detail??p.detail,image:data.image_url||data.image||p.image,options:Array.isArray(data.options)?data.options:p.options};
+  await loadProductsFromSupabase();
+  if(!products.some(x=>String(x.id)===String(saved.id)))throw new Error("Produk tersimpan tetapi belum muncul saat dibaca ulang. Periksa izin SELECT/RLS.");
+  return saved;
+ }catch(error){alert("Gagal menyimpan produk ke Supabase.\n\n"+(error?.message||"Akses ditolak."));return false;}
+}
+async function removeProductFromSupabase(id){
+ if(typeof supabaseClient==="undefined"){alert("Koneksi database belum siap.");return false;}
+ if(String(id).startsWith("p")){alert("Produk cadangan tidak memiliki ID database. Muat ulang data dari database sebelum menghapus.");return false;}
+ const session=await getAdminSession();if(!session){alert("Sesi admin tidak aktif. Silakan login admin lagi.");return false;}
+ const{data,error}=await supabaseClient.from("products").delete().eq("id",id).select("id");
+ if(error){alert("Gagal menghapus produk dari Supabase.\n\n"+(error.message||"Akses ditolak."));return false;}
+ if(!Array.isArray(data)||data.length===0){alert("Produk tidak terhapus: database tidak mengonfirmasi baris yang dihapus. Periksa izin DELETE/RLS.");return false;}
+ await loadProductsFromSupabase();return true;
+}
 function renderCats(){const cats=["Semua",...new Set(products.map(p=>p.cat).filter(Boolean))];$("categories").innerHTML=cats.map(c=>`<button type="button" class="chip ${c===activeCat?"active":""}" onclick="window.setCat('${String(c).replace(/'/g,"\\'")}')">${escapeHtml(c)}</button>`).join("");}
 function productVisual(p,cls=""){return p.image?`<img class="${escapeHtml(cls)}" src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}">`:`<div class="icon ${escapeHtml(cls)}">${escapeHtml(p.icon||String(p.name||"").slice(0,2).toUpperCase())}</div>`;}
 function renderProducts(){const q=$("search").value.toLowerCase();const list=products.filter(p=>(activeCat==="Semua"||p.cat===activeCat)&&`${p.name} ${p.cat} ${p.detail}`.toLowerCase().includes(q));$("productTotal").textContent=`${list.length} produk`;$("products").innerHTML=list.map(p=>`<article class="card">${productVisual(p)}<h3>${escapeHtml(p.name)}</h3><div class="meta">${escapeHtml(p.detail||"")}</div><div class="price">${rp(p.price)}</div><button class="add" type="button" data-product-add="1" data-id="${escapeHtml(String(p.id))}">${(p.options||[]).length?"+ Pilih & Keranjang":"+ Keranjang"}</button></article>`).join("")||`<div class="empty" style="grid-column:1/-1">Produk tidak ditemukan.</div>`;}
@@ -86,4 +151,4 @@ document.addEventListener("click",function(event){
   window.addProductToCart(button.dataset.id);
 },true);
 window.addEventListener("pageshow",()=>{try{cart=JSON.parse(localStorage.getItem("palugada_cart")||"[]");window.cart=cart;}catch(e){cart=[];window.cart=cart;}renderCart();});document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeCart();closeOptionPicker();}});
-renderCats();renderProducts();renderCart();loadProductsFromSupabase();
+renderCats();renderProducts();renderCart();loadProductsFromSupabase().catch(()=>{});startProductsRealtime();
